@@ -13,19 +13,7 @@ export async function customRequest(req: IncomingMessage) {
   request.query = url.searchParams;
   request.pathname = url.pathname;
   request.params = {};
-
-  const chunks: Buffer[] = [];
-  for await (const chunk of request) {
-    chunks.push(chunk);
-  }
-
-  const body = Buffer.concat(chunks).toString("utf-8");
-
-  if (request.headers["content-type"] === "application/json") {
-    request.body = JSON.parse(body);
-  } else {
-    request.body = {};
-  }
+  request.body = {};
 
   return request;
 }
