@@ -1,6 +1,4 @@
 import { Core } from "./core/core.ts";
-import { pegarCurso } from "./core/database.ts";
-import { bodyJson } from "./core/middleware/body-json.ts";
 import { logger } from "./core/middleware/logger.ts";
 import { RouteError } from "./core/utils/route-error.ts";
 
@@ -8,15 +6,31 @@ const core = new Core();
 
 core.router.use([logger]);
 
-core.router.get("/curso/:slug", (request, response) => {
-  const { slug } = request.params.slug;
-  const resultadoCurso = pegarCurso(slug);
+core.db.exec(/*SQL*/ `
+    CREATE TABLE IF NOT EXISTS "products"
+    (
+      "id" INTEGER PRIMARY KEY,
+      "name" TEXT,
+      "slug" TEXT NOT NULL UNIQUE,
+      "price" INTEGER
+    );
 
-  if (!resultadoCurso) {
-    throw new RouteError(404, "Curso nao encontrados");
+    INSERT OR IGNORE INTO "products"
+      ("name", "slug", "price")
+    VALUES
+      ('Notebook', 'notebook', 3000);
+  `);
+
+core.router.get("/products/:slug", (request, response) => {
+  const { slug } = request.params;
+  const products = core.db
+    .query(/*sql*/ `SELECT * FROM "products" WHERE "slug" = ?;`)
+    .get(slug);
+  if (!products) {
+    throw new RouteError(404, "produto nao encontrados");
   }
 
-  response.status(200).json(resultadoCurso);
+  response.status(200).json(products);
 });
 
 core.init();
