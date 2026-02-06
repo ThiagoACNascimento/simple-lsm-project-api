@@ -1,0 +1,19 @@
+{
+  "name": "projeto_node",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "undici-types": "^7.16.0"
+  },
+  "scripts": {
+    "dev": "node --watch --no-warnings index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "@types/node": "25.2.1"
+  }
+}
