@@ -24,7 +24,7 @@ core.db.exec(/*SQL*/ `
 core.router.get("/products/:slug", (request, response) => {
   const { slug } = request.params;
   const products = core.db
-    .prepare(/*sql*/ `SELECT * FROM "products" WHERE "slug" = ?;`)
+    .query(/*sql*/ `SELECT * FROM "products" WHERE "slug" = ?;`)
     .get(slug);
   if (!products) {
     throw new RouteError(404, "produto nao encontrados");
