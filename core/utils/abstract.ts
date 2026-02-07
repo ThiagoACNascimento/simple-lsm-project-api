@@ -25,3 +25,10 @@ export abstract class Api extends CoreProvider {
     this.routes();
   }
 }
+
+export abstract class Query {
+  db: Core["db"];
+  constructor(db: Core["db"]) {
+    this.db = db;
+  }
+}
