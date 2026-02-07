@@ -1,15 +1,15 @@
+import Router from "./router.ts";
+import { Database } from "./database.ts";
 import {
   createServer,
   type IncomingMessage,
   type ServerResponse,
   type Server,
 } from "node:http";
-import Router from "./router.ts";
 import { customRequest } from "./http/custom-request.ts";
 import { customResponse } from "./http/custom-response.ts";
 import { bodyJson } from "./middleware/body-json.ts";
 import { RouteError } from "./utils/route-error.ts";
-import { Database } from "./database.ts";
 
 export class Core {
   router: Router;
