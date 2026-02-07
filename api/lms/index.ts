@@ -16,7 +16,6 @@ export class LmsApi extends Api {
       ;`,
         )
         .run(slug, title, description, lessons, hours);
-      console.log(writeResult);
       if (!writeResult.changes) {
         throw new RouteError(400, "Erro ao criar curso.");
       }
@@ -27,6 +26,46 @@ export class LmsApi extends Api {
         title: "Curso criado!",
       });
     },
+
+    postLessons: (request, response) => {
+      const {
+        courseSlug,
+        slug,
+        title,
+        seconds,
+        video,
+        description,
+        order,
+        free,
+      } = request.body;
+      const writeResult = this.db
+        .query(
+          /*sql*/ `
+          INSERT OR IGNORE INTO "lessons"
+            (
+              "course_id", "slug", 
+              "title", "seconds", 
+              "video", "description", 
+              "order", "free"
+            )
+          VALUES 
+            (
+              (SELECT "id" FROM "courses" WHERE "slug" = ?),
+              ?,?,?,?,?,?,?
+            )
+      ;`,
+        )
+        .run(courseSlug, slug, title, seconds, video, description, order, free);
+      if (!writeResult.changes) {
+        throw new RouteError(400, "Erro ao criar aula.");
+      }
+
+      response.status(201).json({
+        id: writeResult.lastInsertRowid,
+        changes: writeResult.changes,
+        title: "Aula criado!",
+      });
+    },
   } satisfies Api["handlers"];
 
   tables(): void {
@@ -35,5 +74,6 @@ export class LmsApi extends Api {
 
   routes(): void {
     this.router.post("/lms/courses", this.handlers.postCourses);
+    this.router.post("/lms/lessons", this.handlers.postLessons);
   }
 }
