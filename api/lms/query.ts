@@ -175,4 +175,56 @@ export class LmsQuery extends Query {
       )
       .run(userId, courseId, lessonId);
   }
+
+  selectLessonCompleted(userId: number, lessonId: number) {
+    return this.db
+      .prepare(
+        /*sql*/
+        `
+        SELECT 
+          "completed"
+        FROM 
+          "lessons_completed"
+        WHERE
+          "user_id" = ?
+          AND
+          "lesson_id" = ?
+    ;`,
+      )
+      .get(userId, lessonId) as { completed: string } | undefined;
+  }
+
+  selectLessonsCompleted(userId: number, courseId: number) {
+    return this.db
+      .prepare(
+        /*sql*/
+        `
+        SELECT 
+          "lesson_id", "completed"
+        FROM 
+          "lessons_completed"
+        WHERE
+          "user_id" = ?
+          AND
+          "course_id" = ?
+    ;`,
+      )
+      .all(userId, courseId) as { completed: string; lesson_id: number }[];
+  }
+
+  deleteLessonsCopleted(userId: number, courseId: number) {
+    return this.db
+      .prepare(
+        /*sql*/
+        `
+          DELETE FROM 
+            "lessons_completed"
+          WHERE
+            "user_id" = ?
+            AND 
+            "course_id" = ?
+      ;`,
+      )
+      .run(userId, courseId);
+  }
 }
