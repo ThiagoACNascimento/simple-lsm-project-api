@@ -12,6 +12,23 @@ type CourseData = {
 
 type CourseCreate = Omit<CourseData, "id" | "created">;
 
+type LessonData = {
+  id: number;
+  course_id: number;
+  slug: string;
+  title: string;
+  seconds: number;
+  video: string;
+  description: string;
+  order: number;
+  free: number;
+  created: string;
+};
+
+type LessonCreate = Omit<LessonData, "id" | "course_id" | "created"> & {
+  courseSlug: string;
+};
+
 export class LmsQuery extends Query {
   insertCourse({ slug, title, description, lessons, hours }: CourseCreate) {
     return this.db
@@ -24,5 +41,70 @@ export class LmsQuery extends Query {
       ;`,
       )
       .run(slug, title, description, lessons, hours);
+  }
+
+  insertLesson({
+    courseSlug,
+    slug,
+    title,
+    seconds,
+    video,
+    description,
+    order,
+    free,
+  }: LessonCreate) {
+    return this.db
+      .query(
+        /*sql*/ `
+        INSERT OR IGNORE INTO "lessons"
+          (
+            "course_id", "slug", 
+            "title", "seconds", 
+            "video", "description", 
+            "order", "free"
+          )
+        VALUES 
+          (
+            (SELECT "id" FROM "courses" WHERE "slug" = ?),
+            ?,?,?,?,?,?,?
+          )
+          ;`,
+      )
+      .run(courseSlug, slug, title, seconds, video, description, order, free);
+  }
+
+  selectCourses() {
+    return this.db
+      .prepare(
+        /*sql*/
+        `
+        SELECT 
+          *
+        FROM
+          "courses"
+        ORDER BY
+          "created"
+        ASC
+        LIMIT 
+          100
+    ;`,
+      )
+      .all() as CourseData[];
+  }
+
+  selectCourse(slug: string) {
+    return this.db
+      .prepare(
+        /*sql*/
+        `
+        SELECT 
+          *
+        FROM
+          "courses"
+        WHERE
+          "slug" = ?
+    ;`,
+      )
+      .get(slug) as CourseData | undefined;
   }
 }

@@ -28,6 +28,27 @@ export class LmsApi extends Api {
       });
     },
 
+    getCourses: (request, response) => {
+      const courses = this.query.selectCourses();
+
+      if (courses.length === 0) {
+        throw new RouteError(404, "Nenhum curso encontrado");
+      }
+
+      response.status(200).json(courses);
+    },
+
+    getCourse: (request, response) => {
+      const { slug } = request.params;
+      const course = this.query.selectCourse(slug);
+
+      if (!course) {
+        throw new RouteError(404, "Nenhum curso encontrado");
+      }
+
+      response.status(200).json(course);
+    },
+
     postLesson: (request, response) => {
       const {
         courseSlug,
@@ -39,24 +60,16 @@ export class LmsApi extends Api {
         order,
         free,
       } = request.body;
-      const writeResult = this.db
-        .query(
-          /*sql*/ `
-          INSERT OR IGNORE INTO "lessons"
-            (
-              "course_id", "slug", 
-              "title", "seconds", 
-              "video", "description", 
-              "order", "free"
-            )
-          VALUES 
-            (
-              (SELECT "id" FROM "courses" WHERE "slug" = ?),
-              ?,?,?,?,?,?,?
-            )
-      ;`,
-        )
-        .run(courseSlug, slug, title, seconds, video, description, order, free);
+      const writeResult = this.query.insertLesson({
+        courseSlug,
+        slug,
+        title,
+        seconds,
+        video,
+        description,
+        order,
+        free,
+      });
       if (!writeResult.changes) {
         throw new RouteError(400, "Erro ao criar aula.");
       }
@@ -75,6 +88,8 @@ export class LmsApi extends Api {
 
   routes(): void {
     this.router.post("/lms/course", this.handlers.postCourse);
+    this.router.get("/lms/courses", this.handlers.getCourses);
+    this.router.get("/lms/course/:slug", this.handlers.getCourse);
     this.router.post("/lms/lesson", this.handlers.postLesson);
   }
 }
