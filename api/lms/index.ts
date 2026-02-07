@@ -3,6 +3,7 @@ import { Api } from "../../core/utils/abstract.ts";
 import { RouteError } from "../../core/utils/route-error.ts";
 import { LmsQuery } from "./query.ts";
 import { lmsTables } from "./tables.ts";
+import { getCACertificates } from "node:tls";
 
 export class LmsApi extends Api {
   query = new LmsQuery(this.db);
@@ -172,6 +173,28 @@ export class LmsApi extends Api {
         title: "Curso resetado.",
       });
     },
+
+    getCertificates: (request, response) => {
+      const userId = 1;
+      const certificates = this.query.selectCertificates(userId);
+
+      if (certificates.length === 0) {
+        throw new RouteError(400, "Nenhum certificado encontrado!");
+      }
+
+      response.status(200).json(certificates);
+    },
+
+    getCertificate: (request, response) => {
+      const { certificateId } = request.params;
+      const certificate = this.query.selectCertificate(certificateId);
+
+      if (!certificate) {
+        throw new RouteError(400, "Certificado nao encontrado!");
+      }
+
+      response.status(200).json(certificate);
+    },
   } satisfies Api["handlers"];
 
   tables(): void {
@@ -189,5 +212,7 @@ export class LmsApi extends Api {
       this.handlers.getLesson,
     );
     this.router.post("/lms/lesson/complete", this.handlers.postCompletedLesson);
+    this.router.get("/lms/certificates", this.handlers.getCertificates);
+    this.router.get("/lms/certificates/:id", this.handlers.getCertificate);
   }
 }
