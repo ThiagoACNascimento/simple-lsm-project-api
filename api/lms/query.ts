@@ -107,4 +107,58 @@ export class LmsQuery extends Query {
       )
       .get(slug) as CourseData | undefined;
   }
+
+  selectLessons(courseSlug: string) {
+    return this.db
+      .prepare(
+        /*sql*/
+        `
+        SELECT 
+          *
+        FROM
+          "lessons"
+        WHERE
+          "course_id" = (SELECT "id" FROM "courses" WHERE "slug" = ?) 
+        ORDER BY  
+          "order" ASC
+    ;`,
+      )
+      .all(courseSlug) as LessonData[];
+  }
+
+  selectLesson(courseSlug: string, lessonSlug: string) {
+    return this.db
+      .prepare(
+        /*sql*/
+        `
+        SELECT 
+          *
+        FROM
+          "lessons"
+        WHERE
+          "course_id" = (SELECT "id" FROM "courses" WHERE "slug" = ?) 
+          AND
+          "slug" = ?
+    ;`,
+      )
+      .get(courseSlug, lessonSlug) as LessonData | undefined;
+  }
+
+  selectLessonNav(courseSlug: string, lessonSlug: string) {
+    return this.db
+      .prepare(
+        /*sql*/
+        `
+        SELECT 
+          "slug"
+        FROM
+          "lesson_nav"
+        WHERE
+          "course_id" = (SELECT "id" FROM "courses" WHERE "slug" = ?) 
+          AND
+          "current_slug" = ?
+    ;`,
+      )
+      .all(courseSlug, lessonSlug) as { slug: string }[];
+  }
 }

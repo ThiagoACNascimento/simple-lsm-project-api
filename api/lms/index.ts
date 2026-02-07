@@ -41,12 +41,13 @@ export class LmsApi extends Api {
     getCourse: (request, response) => {
       const { slug } = request.params;
       const course = this.query.selectCourse(slug);
+      const lessons = this.query.selectLessons(slug);
 
       if (!course) {
         throw new RouteError(404, "Nenhum curso encontrado");
       }
 
-      response.status(200).json(course);
+      response.status(200).json({ course, lessons });
     },
 
     postLesson: (request, response) => {
@@ -80,6 +81,25 @@ export class LmsApi extends Api {
         title: "Aula criado!",
       });
     },
+
+    getLesson: (request, response) => {
+      const { courseSlug, lessonSlug } = request.params;
+      const lesson = this.query.selectLesson(courseSlug, lessonSlug);
+      const nav = this.query.selectLessonNav(courseSlug, lessonSlug);
+
+      if (!lesson) {
+        throw new RouteError(404, "Aula nao encontrada");
+      }
+
+      const index = nav.findIndex(
+        (lessonNav) => lessonNav.slug === lesson.slug,
+      );
+
+      const indexPrev = index === 0 ? null : nav.at(index - 1)?.slug;
+      const indexNext = nav.at(index + 1)?.slug ?? null;
+
+      response.status(200).json({ ...lesson, indexPrev, indexNext });
+    },
   } satisfies Api["handlers"];
 
   tables(): void {
@@ -91,5 +111,9 @@ export class LmsApi extends Api {
     this.router.get("/lms/courses", this.handlers.getCourses);
     this.router.get("/lms/course/:slug", this.handlers.getCourse);
     this.router.post("/lms/lesson", this.handlers.postLesson);
+    this.router.get(
+      "/lms/lesson/:courseSlug/:lessonSlug",
+      this.handlers.getLesson,
+    );
   }
 }
