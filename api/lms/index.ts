@@ -95,6 +95,7 @@ export class LmsApi extends Api {
     postCompletedLesson: (request, response) => {
       const userId = 1;
       const { courseId, lessonId } = request.body;
+
       const writeResult = this.query.insertLessonCompleted(
         userId,
         courseId,
@@ -105,9 +106,26 @@ export class LmsApi extends Api {
         throw new RouteError(400, "Erro ao completar aula.");
       }
 
-      response.status(200).json({
+      const progress = this.query.selectProgress(userId, courseId);
+      const incompliteLessons = progress.filter((item) => !item.completed);
+      if (progress.length > 0 && incompliteLessons.length === 0) {
+        const result = this.query.insertCertificate(userId, courseId);
+
+        if (!result) {
+          throw new RouteError(400, "Erro ao gerar certificado");
+        }
+
+        response.status(201).json({
+          title: "Aula completada.",
+          certificate: result.id,
+        });
+      }
+
+      response.status(201).json({
         title: "Aula completada.",
+        certificate: null,
       });
+      return;
     },
 
     getLesson: (request, response) => {
