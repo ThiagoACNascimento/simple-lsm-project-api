@@ -18,7 +18,6 @@ export class Database extends DatabaseSync {
     `);
   }
   query(sql: string) {
-    console.log(this.queries);
     if (!this.queries[sql]) {
       this.queries[sql] = this.prepare(sql);
     }
