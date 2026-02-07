@@ -82,6 +82,24 @@ export class LmsApi extends Api {
       });
     },
 
+    postCompletedLesson: (request, response) => {
+      const userId = 1;
+      const { courseId, lessonId } = request.body;
+      const writeResult = this.query.insertLessonCompleted(
+        userId,
+        courseId,
+        lessonId,
+      );
+
+      if (writeResult.changes === 0) {
+        throw new RouteError(400, "Erro ao completar aula.");
+      }
+
+      response.status(200).json({
+        title: "Aula completada.",
+      });
+    },
+
     getLesson: (request, response) => {
       const { courseSlug, lessonSlug } = request.params;
       const lesson = this.query.selectLesson(courseSlug, lessonSlug);
@@ -115,5 +133,6 @@ export class LmsApi extends Api {
       "/lms/lesson/:courseSlug/:lessonSlug",
       this.handlers.getLesson,
     );
+    this.router.post("/lms/lesson/complete", this.handlers.postCompletedLesson);
   }
 }
