@@ -89,6 +89,14 @@
           body: JSON.stringify(Object.fromEntries(data)),
         });
       });
+
+      async function autenticado() {
+        const response = await fetch("/auth/session");
+        const body = await response.json();
+        result.innerHTML = JSON.stringify(body, null, 2);
+      }
+
+      autenticado();
     </script>
   </body>
 </html>

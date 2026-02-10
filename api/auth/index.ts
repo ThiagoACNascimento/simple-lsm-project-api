@@ -1,7 +1,7 @@
 import { Api } from "../../core/utils/abstract.ts";
 import { RouteError } from "../../core/utils/route-error.ts";
 import { AuthQuery } from "./query.ts";
-import { SessionService } from "./services/session.ts";
+import { COOKIE_SESSION_ID_KEY, SessionService } from "./services/session.ts";
 import { authTables } from "./tables.ts";
 
 export class AuthApi extends Api {
@@ -54,6 +54,25 @@ export class AuthApi extends Api {
       response.setCookie(cookie);
       response.status(200).json({ title: "autenticado" });
     },
+
+    getSession: (request, response) => {
+      const session_id = request.cookies[COOKIE_SESSION_ID_KEY];
+
+      if (!session_id) {
+        throw new RouteError(401, "Nao autorizado");
+      }
+
+      const { valid, cookie, session } = this.session.validate(session_id);
+      response.setCookie(cookie);
+
+      if (!valid || !session) {
+        throw new RouteError(401, "Nao autorizado");
+      }
+
+      response.setHeader("Cache-Control", "private, no-store");
+      response.setHeader("Vary", "Cookie");
+      response.status(200).json(session);
+    },
   } satisfies Api["handlers"];
 
   tables(): void {
@@ -63,5 +82,6 @@ export class AuthApi extends Api {
   routes(): void {
     this.router.post("/auth/user", this.handlers.postUser);
     this.router.post("/auth/login", this.handlers.postLogin);
+    this.router.get("/auth/session", this.handlers.getSession);
   }
 }
