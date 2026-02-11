@@ -1,7 +1,7 @@
 import { run } from "node:test";
 import { Query } from "../../core/utils/abstract.ts";
 
-type UserRole = "admin" | "editor" | "user";
+export type UserRole = "admin" | "editor" | "user";
 
 type UserData = {
   id: number;

@@ -91,7 +91,7 @@
       });
 
       async function autenticado() {
-        const response = await fetch("/auth/session");
+        const response = await fetch("/lms/course/html-e-css");
         const body = await response.json();
         result.innerHTML = JSON.stringify(body, null, 2);
       }
