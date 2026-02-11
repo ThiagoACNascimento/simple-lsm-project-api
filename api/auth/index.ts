@@ -1,5 +1,7 @@
+import { title } from "node:process";
 import { Api } from "../../core/utils/abstract.ts";
 import { RouteError } from "../../core/utils/route-error.ts";
+import { AuthMiddleware } from "./middleware/auth.ts";
 import { AuthQuery } from "./query.ts";
 import { COOKIE_SESSION_ID_KEY, SessionService } from "./services/session.ts";
 import { authTables } from "./tables.ts";
@@ -7,6 +9,8 @@ import { authTables } from "./tables.ts";
 export class AuthApi extends Api {
   query = new AuthQuery(this.db);
   session = new SessionService(this.core);
+  auth = new AuthMiddleware(this.core);
+
   handlers = {
     postUser: (request, response) => {
       const { name, username, email, password } = request.body;
@@ -56,22 +60,22 @@ export class AuthApi extends Api {
     },
 
     getSession: (request, response) => {
+      if (!request.session) {
+        throw new RouteError(401, "Nao autorizado");
+      }
+
+      response.status(200).json({ title: "valida" });
+    },
+
+    deleteSession: (request, response) => {
       const session_id = request.cookies[COOKIE_SESSION_ID_KEY];
+      const { cookie } = this.session.invalidate(session_id);
 
-      if (!session_id) {
-        throw new RouteError(401, "Nao autorizado");
-      }
-
-      const { valid, cookie, session } = this.session.validate(session_id);
       response.setCookie(cookie);
-
-      if (!valid || !session) {
-        throw new RouteError(401, "Nao autorizado");
-      }
-
       response.setHeader("Cache-Control", "private, no-store");
       response.setHeader("Vary", "Cookie");
-      response.status(200).json(session);
+
+      response.status(204).json({ title: "logout" });
     },
   } satisfies Api["handlers"];
 
@@ -82,6 +86,9 @@ export class AuthApi extends Api {
   routes(): void {
     this.router.post("/auth/user", this.handlers.postUser);
     this.router.post("/auth/login", this.handlers.postLogin);
-    this.router.get("/auth/session", this.handlers.getSession);
+    this.router.get("/auth/session", this.handlers.getSession, [
+      this.auth.guard("user"),
+    ]);
+    this.router.delete("/auth/logout", this.handlers.deleteSession);
   }
 }

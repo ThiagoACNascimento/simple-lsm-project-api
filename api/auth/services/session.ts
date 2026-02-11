@@ -83,4 +83,17 @@ export class SessionService extends CoreProvider {
       },
     };
   }
+
+  invalidate(session_id: string | undefined) {
+    const cookie = cookieGenerate("", 0);
+    try {
+      if (session_id) {
+        const session_id_hash = sha256(session_id);
+        this.query.revokeSession("session_id", session_id_hash);
+      }
+    } catch {
+    } finally {
+      return { cookie };
+    }
+  }
 }
