@@ -48,6 +48,22 @@ export class AuthQuery extends Query {
       .run(name, username, email, role, password_hash);
   }
 
+  selectUser(key: "email" | "username" | "id", value: string) {
+    return this.db
+      .query(
+        /*sql*/
+        `
+            SELECT 
+              "id", "password_hash"
+            FROM 
+              "users"
+            WHERE 
+              ${key} = ?
+        ;`,
+      )
+      .get(value) as { id: number; password_hash: string } | undefined;
+  }
+
   insertSession({
     session_id_hash,
     user_id,

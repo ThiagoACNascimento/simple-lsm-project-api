@@ -1,6 +1,6 @@
 import { CoreProvider } from "../../../core/utils/abstract.ts";
 import { AuthQuery } from "../query.ts";
-import { randomBytsAsync, sha256 } from "../utils.ts";
+import { randomBytsAsync, sha256 } from "../utils/utils.ts";
 
 const time_to_live_seconds = 60 * 60 * 24 * 15;
 const time_to_live_seconds_five_days = 60 * 60 * 24 * 5;
