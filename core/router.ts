@@ -25,6 +25,7 @@ class Router {
     GET: {},
     POST: {},
     PUT: {},
+    PATCH: {},
     DELETE: {},
     HEAD: {},
   };
@@ -41,6 +42,10 @@ class Router {
 
   put(route: string, handler: Handler, middlewares: Middleware[] = []) {
     this.routes["PUT"][route] = { handler, middlewares };
+  }
+
+  patch(route: string, handler: Handler, middlewares: Middleware[] = []) {
+    this.routes["PATCH"][route] = { handler, middlewares };
   }
 
   delete(route: string, handler: Handler, middlewares: Middleware[] = []) {

@@ -48,6 +48,42 @@ export class AuthQuery extends Query {
       .run(name, username, email, role, password_hash);
   }
 
+  selectUser(key: "email" | "username" | "id", value: string | number) {
+    return this.db
+      .query(
+        /*sql*/
+        `
+            SELECT 
+              "id", "password_hash"
+            FROM 
+              "users"
+            WHERE 
+              ${key} = ?
+        ;`,
+      )
+      .get(value) as { id: number; password_hash: string } | undefined;
+  }
+
+  updateUser(
+    user_id: number,
+    key: "email" | "password_hash" | "username" | "name",
+    value: string,
+  ) {
+    return this.db
+      .query(
+        /*sql*/
+        `
+            UPDATE 
+              "users"
+            SET 
+              ${key} = ?
+            WHERE 
+              "id" = ?
+        ;`,
+      )
+      .run(value, user_id);
+  }
+
   insertSession({
     session_id_hash,
     user_id,
@@ -87,7 +123,7 @@ export class AuthQuery extends Query {
       | undefined;
   }
 
-  revokeSession(key: "session_id" | "user_id", session_id_hash: Buffer) {
+  revokeSession(session_id_hash: Buffer) {
     return this.db
       .query(
         /*sql*/
@@ -97,10 +133,26 @@ export class AuthQuery extends Query {
           SET 
             "revoked" = 1 
           WHERE
-            ${key} = ?
+            "session_id" = ?
       ;`,
       )
       .run(session_id_hash);
+  }
+
+  revokeAllSessions(userId: number) {
+    return this.db
+      .query(
+        /*sql*/
+        `
+          UPDATE
+            "sessions"
+          SET
+            "revoked" = 1
+          WHERE
+            "user_id" = ?
+      ;`,
+      )
+      .run(userId);
   }
 
   updateSessionExpires(session_id_hash: Buffer, expires_msUpdate: number) {

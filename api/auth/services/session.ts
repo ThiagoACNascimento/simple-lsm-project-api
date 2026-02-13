@@ -1,6 +1,6 @@
 import { CoreProvider } from "../../../core/utils/abstract.ts";
 import { AuthQuery } from "../query.ts";
-import { randomBytsAsync, sha256 } from "../utils.ts";
+import { randomBytsAsync, sha256 } from "../utils/utils.ts";
 
 const time_to_live_seconds = 60 * 60 * 24 * 15;
 const time_to_live_seconds_five_days = 60 * 60 * 24 * 5;
@@ -50,7 +50,7 @@ export class SessionService extends CoreProvider {
     let expires_ms = session.expires_ms;
 
     if (now >= expires_ms) {
-      this.query.revokeSession("session_id", session_id_hash);
+      this.query.revokeSession(session_id_hash);
       return {
         valid: false,
         cookie: cookieGenerate("", 0),
@@ -66,7 +66,7 @@ export class SessionService extends CoreProvider {
     const user = this.query.selectUserRole(session.user_id);
 
     if (!user) {
-      this.query.revokeSession("session_id", session_id_hash);
+      this.query.revokeSession(session_id_hash);
       return {
         valid: false,
         cookie: cookieGenerate("", 0),
@@ -89,11 +89,15 @@ export class SessionService extends CoreProvider {
     try {
       if (session_id) {
         const session_id_hash = sha256(session_id);
-        this.query.revokeSession("session_id", session_id_hash);
+        this.query.revokeSession(session_id_hash);
       }
     } catch {
     } finally {
       return { cookie };
     }
+  }
+
+  invalidateAll(user_id: number) {
+    this.query.revokeAllSessions(user_id);
   }
 }
