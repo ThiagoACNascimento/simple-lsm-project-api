@@ -70,6 +70,51 @@ export class AuthApi extends Api {
       response.status(200).json({ title: "autenticado" });
     },
 
+    patchPassword: async (request, response) => {
+      if (!request.session) {
+        throw new RouteError(401, "Nao autorizado");
+      }
+
+      const { password, newPassword } = request.body;
+      const user = this.query.selectUser("id", request.session.user_id);
+
+      if (!user) {
+        throw new RouteError(404, "Usuario nao encontrado");
+      }
+
+      const validPassword = await this.pass.verify(
+        password,
+        user.password_hash,
+      );
+
+      if (!validPassword) {
+        throw new RouteError(400, "Senha incorreta, tente novamente.");
+      }
+
+      const newPasswordHashed = await this.pass.hash(newPassword);
+
+      const updatedUser = this.query.updateUser(
+        user.id,
+        "password_hash",
+        newPasswordHashed,
+      );
+
+      if (updatedUser.changes === 0) {
+        throw new RouteError(400, "Erro ao atualizar senha");
+      }
+
+      this.session.invalidateAll(user.id);
+
+      const { cookie } = await this.session.create({
+        userId: user.id,
+        ip: request.ip,
+        ua: request.headers["user-agent"] ?? "",
+      });
+
+      response.setCookie(cookie);
+      response.status(200).json({ title: "Senha atualizada!" });
+    },
+
     getSession: (request, response) => {
       if (!request.session) {
         throw new RouteError(401, "Nao autorizado");
@@ -97,6 +142,9 @@ export class AuthApi extends Api {
   routes(): void {
     this.router.post("/auth/user", this.handlers.postUser);
     this.router.post("/auth/login", this.handlers.postLogin);
+    this.router.patch("/auth/update/password", this.handlers.patchPassword, [
+      this.auth.guard("user"),
+    ]);
     this.router.get("/auth/session", this.handlers.getSession, [
       this.auth.guard("user"),
     ]);
