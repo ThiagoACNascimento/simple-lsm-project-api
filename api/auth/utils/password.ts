@@ -102,5 +102,3 @@ const password_hash = await pass.hash(password);
 
 const isTrue = await pass.verify(password, password_hash);
 const isFalse = await pass.verify("123456", password_hash);
-
-console.log({ isTrue, isFalse });
