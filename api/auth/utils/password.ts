@@ -71,32 +71,27 @@ export class Password {
   }
 
   async verify(password: string, password_hash: string) {
-    const { stored_options, stored_norm, stored_derivedKey, stored_salt } =
-      this.parse(password_hash);
+    try {
+      const { stored_options, stored_norm, stored_derivedKey, stored_salt } =
+        this.parse(password_hash);
 
-    const password_normalized = password.normalize(stored_norm);
-    const password_hmac = createHmac("sha256", this.PEPEER)
-      .update(password_normalized)
-      .digest();
+      const password_normalized = password.normalize(stored_norm);
+      const password_hmac = createHmac("sha256", this.PEPEER)
+        .update(password_normalized)
+        .digest();
 
-    const derivedKey = await scryptAsync(
-      password_hmac,
-      stored_salt,
-      this.DERIVED_KEY_LENGTH,
-      stored_options,
-    );
+      const derivedKey = await scryptAsync(
+        password_hmac,
+        stored_salt,
+        this.DERIVED_KEY_LENGTH,
+        stored_options,
+      );
 
-    if (derivedKey.length !== stored_derivedKey.length) return false;
+      if (derivedKey.length !== stored_derivedKey.length) return false;
 
-    return timingSafeEqual(derivedKey, stored_derivedKey);
+      return timingSafeEqual(derivedKey, stored_derivedKey);
+    } catch (error) {
+      return false;
+    }
   }
 }
-
-const password = "P@ssw0rd";
-const pass = new Password("segredo");
-const password_hash = await pass.hash(password);
-
-const isTrue = await pass.verify(password, password_hash);
-const isFalse = await pass.verify("123456", password_hash);
-
-console.log({ isTrue, isFalse });

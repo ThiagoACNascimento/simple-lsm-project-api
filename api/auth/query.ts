@@ -24,6 +24,15 @@ type SessionData = {
   revoked: number; // 0 ou 1
 };
 
+type ResetData = {
+  token_hash: Buffer;
+  user_id: number;
+  created: number;
+  expires: number;
+  ip: string;
+  ua: string;
+};
+
 type UserCreate = Omit<UserData, "id" | "created" | "updated">;
 type SessionCreate = Omit<
   SessionData,
@@ -31,6 +40,10 @@ type SessionCreate = Omit<
 > & {
   expires_ms: number;
   session_id_hash: Buffer;
+};
+
+type ResetCreate = Omit<ResetData, "created" | "expires"> & {
+  expires_ms: number;
 };
 
 export class AuthQuery extends Query {
@@ -54,14 +67,16 @@ export class AuthQuery extends Query {
         /*sql*/
         `
             SELECT 
-              "id", "password_hash"
+              "id", "password_hash", "email"
             FROM 
               "users"
             WHERE 
               ${key} = ?
         ;`,
       )
-      .get(value) as { id: number; password_hash: string } | undefined;
+      .get(value) as
+      | { id: number; password_hash: string; email: string }
+      | undefined;
   }
 
   updateUser(
@@ -185,5 +200,51 @@ export class AuthQuery extends Query {
       ;`,
       )
       .get(user_id) as { role: UserRole } | undefined;
+  }
+
+  insertReset({ token_hash, user_id, expires_ms, ip, ua }: ResetCreate) {
+    return this.db
+      .query(
+        /*sql*/
+        `
+        INSERT OR IGNORE INTO "resets"
+          ("token_hash", "user_id", "expires", "ip", "ua")
+        VALUES
+          (?,?,?,?,?)
+      ;`,
+      )
+      .run(token_hash, user_id, Math.floor(expires_ms / 1000), ip, ua);
+  }
+
+  selectReset(token_hash: Buffer) {
+    return this.db
+      .query(
+        /*sql*/
+        `
+          SELECT 
+            "r".*, 
+            "r"."expires" * 1000 as "expires_ms"
+          FROM 
+            "resets" as "r"
+          WHERE 
+            "token_hash" = ?
+      ;`,
+      )
+      .get(token_hash) as (ResetData & { expires_ms: number }) | undefined;
+  }
+
+  deleteReset(user_id: number) {
+    return this.db
+      .query(
+        /*sql*/
+        `
+          DELETE
+          FROM 
+            "resets" 
+          WHERE
+            "user_id" = ?
+      ;`,
+      )
+      .run(user_id);
   }
 }

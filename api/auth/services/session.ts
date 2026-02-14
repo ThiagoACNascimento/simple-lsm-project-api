@@ -14,7 +14,7 @@ function cookieGenerate(session_id: string, expires: number) {
 export class SessionService extends CoreProvider {
   query = new AuthQuery(this.db);
 
-  async create({ userId, ip, ua }) {
+  async create({ userId, ip, ua }: { userId: number; ip: string; ua: string }) {
     const session_id = (await randomBytsAsync(32)).toString("base64url");
     const session_id_hash = sha256(session_id);
 
@@ -99,5 +99,40 @@ export class SessionService extends CoreProvider {
 
   invalidateAll(user_id: number) {
     this.query.revokeAllSessions(user_id);
+  }
+
+  async resetToken({
+    userId,
+    ip,
+    ua,
+  }: {
+    userId: number;
+    ip: string;
+    ua: string;
+  }) {
+    const token = (await randomBytsAsync(32)).toString("base64url");
+    const token_hash = sha256(token);
+    const expires_ms = Date.now() + 1000 * 60 * 30;
+    this.query.insertReset({ token_hash, expires_ms, user_id: userId, ip, ua });
+    return { token };
+  }
+
+  async validateToken(token: string) {
+    const now = Date.now();
+    const token_hash = sha256(token);
+    const reset = this.query.selectReset(token_hash);
+
+    if (!reset) {
+      return null;
+    }
+
+    if (now > reset.expires_ms) {
+      return null;
+    }
+
+    this.query.revokeAllSessions(reset.user_id);
+    this.query.deleteReset(reset.user_id);
+
+    return { user_id: reset.user_id };
   }
 }

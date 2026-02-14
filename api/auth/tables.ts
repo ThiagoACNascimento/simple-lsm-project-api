@@ -22,4 +22,18 @@ export const authTables = /*sql*/ `
   ) WITHOUT ROWID, STRICT;
 
   CREATE INDEX IF NOT EXISTS "index_session_user" ON "sessions" ("user_id");
+
+
+  CREATE TABLE IF NOT EXISTS "resets" (
+    "token_hash" BLOB PRIMARY KEY,
+    "user_id" INTEGER NOT NULL,
+    "created" INTEGER NOT NULL DEFAULT (STRFTIME('%s', 'NOW')),
+    "expires" INTEGER NOT NULL,
+    "ip" TEXT,
+    "ua" TEXT,
+
+    FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON DELETE CASCADE
+  ) WITHOUT ROWID, STRICT;
+
+  CREATE INDEX IF NOT EXISTS "index_reset_user" ON "resets" ("user_id");
 `;

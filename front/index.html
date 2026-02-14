@@ -74,21 +74,90 @@
       <label for="password">Senha</label>
       <input type="password" name="password" id="password" />
 
-      <button>Logar</button>
+      <button>Loggar</button>
+    </form>
+
+    <form id="update-password">
+      <label for="password">Senha Atual</label>
+      <input type="password" name="password" value="12345" />
+
+      <label for="newPassword">Senha Nova</label>
+      <input type="password" name="newPassword" value="123" />
+
+      <button>Atualizar</button>
+    </form>
+
+    <form id="forgot-password">
+      <label for="email">Email</label>
+      <input type="email" name="email" value="thiago@test.com" />
+
+      <button>Esqueci a Senha</button>
+    </form>
+
+    <form id="reset-password">
+      <label for="newPassword">Nova Senha</label>
+      <input type="password" name="newPassword" value="123456789" />
+
+      <label for="token">Token</label>
+      <input type="text" name="token" value="" />
+
+      <button>Resetar Senha</button>
     </form>
 
     <button id="logout">Sair</button>
     <pre id="result"></pre>
 
     <script>
-      const form = document.getElementById("login");
+      const login = document.getElementById("login");
+      const updatePassword = document.getElementById("update-password");
+      const forgotPassword = document.getElementById("forgot-password");
+      const resetPassword = document.getElementById("reset-password");
       const result = document.getElementById("result");
       const logout = document.getElementById("logout");
 
-      form.addEventListener("submit", async (event) => {
+      login.addEventListener("submit", async (event) => {
         event.preventDefault();
-        const data = new FormData(form);
+        const data = new FormData(login);
         const response = await fetch("/auth/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify(Object.fromEntries(data)),
+        });
+      });
+
+      updatePassword.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const data = new FormData(updatePassword);
+        const response = await fetch("/auth/password/update", {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify(Object.fromEntries(data)),
+        });
+      });
+
+      forgotPassword.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const data = new FormData(forgotPassword);
+        const response = await fetch("/auth/password/forgot", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify(Object.fromEntries(data)),
+        });
+      });
+
+      resetPassword.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const data = new FormData(resetPassword);
+        const response = await fetch("/auth/password/reset", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
