@@ -76,7 +76,6 @@ export class AuthApi extends Api {
       }
 
       const { password, newPassword } = request.body;
-      console.log(password, newPassword);
       const user = this.query.selectUser("id", request.session.user_id);
 
       if (!user) {
