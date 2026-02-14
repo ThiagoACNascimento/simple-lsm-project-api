@@ -115,6 +115,54 @@ export class AuthApi extends Api {
       response.status(200).json({ title: "Senha atualizada!" });
     },
 
+    forgotPassword: async (request, response) => {
+      const { email } = request.body;
+      const user = this.query.selectUser("email", email);
+
+      if (!user) {
+        return response.status(200).json({ title: "Verifique seu email" });
+      }
+
+      const { token } = await this.session.resetToken({
+        userId: user.id,
+        ip: request.ip,
+        ua: request.headers["user-agent"] || "",
+      });
+
+      const resetLink = `${request.baseurl}/password/reset/?token=${token}`;
+
+      const mailContent = {
+        to: user.email,
+        subject: "Password Reset",
+        body: `Utilize o link abaixo para resetar a sua senha: \r\n ${resetLink}`,
+      };
+
+      console.log(mailContent);
+      response.status(200).json({ title: "Verifique seu emailf" });
+    },
+
+    resetPassword: async (request, response) => {
+      const { newPassword, token } = request.body;
+      const reset = await this.session.validateToken(token);
+
+      if (!reset) {
+        throw new RouteError(400, "token invalido");
+      }
+
+      const new_password_hash = await this.pass.hash(newPassword);
+      const updateResult = this.query.updateUser(
+        reset.user_id,
+        "password_hash",
+        new_password_hash,
+      );
+
+      if (updateResult.changes === 0) {
+        throw new RouteError(400, "Erro ao atualizar senha");
+      }
+
+      response.status(200).json({ title: "Senha atualizada" });
+    },
+
     getSession: (request, response) => {
       if (!request.session) {
         throw new RouteError(401, "Nao autorizado");
@@ -142,9 +190,11 @@ export class AuthApi extends Api {
   routes(): void {
     this.router.post("/auth/user", this.handlers.postUser);
     this.router.post("/auth/login", this.handlers.postLogin);
-    this.router.patch("/auth/update/password", this.handlers.patchPassword, [
+    this.router.patch("/auth/password/update", this.handlers.patchPassword, [
       this.auth.guard("user"),
     ]);
+    this.router.post("/auth/password/forgot", this.handlers.forgotPassword);
+    this.router.post("/auth/password/reset", this.handlers.resetPassword);
     this.router.get("/auth/session", this.handlers.getSession, [
       this.auth.guard("user"),
     ]);

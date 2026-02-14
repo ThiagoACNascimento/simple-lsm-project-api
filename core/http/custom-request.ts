@@ -10,6 +10,7 @@ export interface CustomRequest extends IncomingMessage {
   cookies: Record<string, string | undefined>;
   ip: string;
   session: { user_id: number; role: UserRole; expires_ms: number } | null;
+  baseurl: string;
 }
 
 export async function customRequest(req: IncomingMessage) {
@@ -22,6 +23,7 @@ export async function customRequest(req: IncomingMessage) {
   request.cookies = parseCookies(request.headers.cookie);
   request.ip = request.socket.remoteAddress || "127.0.0.1";
   request.session = null;
+  request.baseurl = "http://localhost:3000";
 
   return request;
 }
