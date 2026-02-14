@@ -74,22 +74,46 @@
       <label for="password">Senha</label>
       <input type="password" name="password" id="password" />
 
-      <button>Logar</button>
+      <button>Loggar</button>
+    </form>
+
+    <form id="update-password">
+      <label for="password">Senha Atual</label>
+      <input type="password" name="password" value="12345" />
+
+      <label for="newPassword">Senha Nova</label>
+      <input type="password" name="newPassword" value="123" />
+
+      <button>Atualizar</button>
     </form>
 
     <button id="logout">Sair</button>
     <pre id="result"></pre>
 
     <script>
-      const form = document.getElementById("login");
+      const login = document.getElementById("login");
+      const updatePassword = document.getElementById("update-password");
       const result = document.getElementById("result");
       const logout = document.getElementById("logout");
 
-      form.addEventListener("submit", async (event) => {
+      login.addEventListener("submit", async (event) => {
         event.preventDefault();
-        const data = new FormData(form);
+        const data = new FormData(login);
         const response = await fetch("/auth/login", {
           method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify(Object.fromEntries(data)),
+        });
+      });
+
+      updatePassword.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const data = new FormData(updatePassword);
+        const response = await fetch("/auth/update/password", {
+          method: "PATCH",
           headers: {
             "Content-Type": "application/json",
           },

@@ -14,7 +14,7 @@ function cookieGenerate(session_id: string, expires: number) {
 export class SessionService extends CoreProvider {
   query = new AuthQuery(this.db);
 
-  async create({ userId, ip, ua }) {
+  async create({ userId, ip, ua }: { userId: number; ip: string; ua: string }) {
     const session_id = (await randomBytsAsync(32)).toString("base64url");
     const session_id_hash = sha256(session_id);
 
