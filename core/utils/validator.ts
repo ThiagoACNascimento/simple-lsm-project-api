@@ -1,4 +1,4 @@
-import { RouteError } from "./route-error";
+import { RouteError } from "./route-error.ts";
 
 const EMAIL_REGEX = /^[^@]+@[^@]+\.[^@]$/;
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/;
@@ -67,7 +67,7 @@ function validateEmail(value: unknown) {
     return undefined;
   }
 
-  return EMAIL_REGEX.test(email) ? value : undefined;
+  return EMAIL_REGEX.test(email) ? email : undefined;
 }
 
 function validatePassword(value: unknown) {
@@ -96,7 +96,7 @@ function valueRequired<Value>(func: Parse<Value>, error: string) {
   };
 }
 
-const validator = {
+export const validator = {
   validateString: valueRequired(validateString, "String esperada"),
   validateNumber: valueRequired(validateNumber, "Numero esperado"),
   validateBoolean: valueRequired(validateBoolean, "Boolean esperado"),
@@ -112,5 +112,3 @@ const validator = {
     validatePassword,
   },
 };
-
-export default validator;

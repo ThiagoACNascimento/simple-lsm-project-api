@@ -5,8 +5,8 @@ import type { UserRole } from "../../api/auth/query.ts";
 export interface CustomRequest extends IncomingMessage {
   query: URLSearchParams;
   pathname: string;
-  body: Record<string, any>;
-  params: Record<string, any>;
+  body: Record<string, unknown>;
+  params: Record<string, string>;
   cookies: Record<string, string | undefined>;
   ip: string;
   session: { user_id: number; role: UserRole; expires_ms: number } | null;
