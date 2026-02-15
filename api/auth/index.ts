@@ -1,4 +1,3 @@
-import { title } from "node:process";
 import { Api } from "../../core/utils/abstract.ts";
 import { RouteError } from "../../core/utils/route-error.ts";
 import { AuthMiddleware } from "./middleware/auth.ts";
