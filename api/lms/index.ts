@@ -1,9 +1,8 @@
-import { title } from "node:process";
 import { Api } from "../../core/utils/abstract.ts";
 import { RouteError } from "../../core/utils/route-error.ts";
+import { validator } from "../../core/utils/validator.ts";
 import { LmsQuery } from "./query.ts";
 import { lmsTables } from "./tables.ts";
-import { getCACertificates } from "node:tls";
 import { AuthMiddleware } from "../auth/middleware/auth.ts";
 
 export class LmsApi extends Api {
@@ -12,7 +11,14 @@ export class LmsApi extends Api {
 
   handlers = {
     postCourse: (request, response) => {
-      const { slug, title, description, lessons, hours } = request.body;
+      const { slug, title, description, lessons, hours } = {
+        slug: validator.validateString(request.body.slug),
+        title: validator.validateString(request.body.title),
+        description: validator.validateString(request.body.description),
+        lessons: validator.validateNumber(request.body.lesson),
+        hours: validator.validateNumber(request.body.hours),
+      };
+
       const writeResult = this.query.insertCourse({
         slug,
         title,
@@ -76,7 +82,16 @@ export class LmsApi extends Api {
         description,
         order,
         free,
-      } = request.body;
+      } = {
+        courseSlug: validator.validateString(request.body.courseSlug),
+        slug: validator.validateString(request.body.slug),
+        title: validator.validateString(request.body.title),
+        seconds: validator.validateNumber(request.body.seconds),
+        video: validator.validateString(request.body.video),
+        description: validator.validateString(request.body.description),
+        order: validator.validateNumber(request.body.order),
+        free: validator.validateNumber(request.body.free),
+      };
       const writeResult = this.query.insertLesson({
         courseSlug,
         slug,
@@ -100,7 +115,10 @@ export class LmsApi extends Api {
 
     postCompletedLesson: (request, response) => {
       const userId = 1;
-      const { courseId, lessonId } = request.body;
+      const { courseId, lessonId } = {
+        courseId: validator.validateNumber(request.body.courseId),
+        lessonId: validator.validateNumber(request.body.lessonId),
+      };
 
       const writeResult = this.query.insertLessonCompleted(
         userId,
@@ -167,7 +185,9 @@ export class LmsApi extends Api {
 
     resetCourse: (request, response) => {
       const userId = 1;
-      const { courseId } = request.body;
+      const { courseId } = {
+        courseId: validator.validateNumber(request.body.courseId),
+      };
       const writeResult = this.query.deleteLessonsCopleted(userId, courseId);
 
       if (writeResult.changes === 0) {

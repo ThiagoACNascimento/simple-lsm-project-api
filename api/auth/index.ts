@@ -1,6 +1,6 @@
-import { title } from "node:process";
 import { Api } from "../../core/utils/abstract.ts";
 import { RouteError } from "../../core/utils/route-error.ts";
+import { validator } from "../../core/utils/validator.ts";
 import { AuthMiddleware } from "./middleware/auth.ts";
 import { AuthQuery } from "./query.ts";
 import { COOKIE_SESSION_ID_KEY, SessionService } from "./services/session.ts";
@@ -15,7 +15,12 @@ export class AuthApi extends Api {
 
   handlers = {
     postUser: async (request, response) => {
-      const { name, username, email, password } = request.body;
+      const { name, username, email, password } = {
+        name: validator.validateString(request.body.name),
+        username: validator.validateString(request.body.username),
+        email: validator.validateEmail(request.body.email),
+        password: validator.validatePassword(request.body.password),
+      };
 
       const emailExists = this.query.selectUser("email", email);
 
@@ -46,7 +51,10 @@ export class AuthApi extends Api {
     },
 
     postLogin: async (request, response) => {
-      const { email, password } = request.body;
+      const { email, password } = {
+        email: validator.validateEmail(request.body.email),
+        password: validator.validatePassword(request.body.password),
+      };
       const user = this.query.selectUser("email", email);
       if (!user) {
         throw new RouteError(404, "Credenciais invalidas, tente novamente.");
@@ -75,7 +83,10 @@ export class AuthApi extends Api {
         throw new RouteError(401, "Nao autorizado");
       }
 
-      const { password, newPassword } = request.body;
+      const { password, newPassword } = {
+        password: validator.validatePassword(request.body.password),
+        newPassword: validator.validatePassword(request.body.newPassword),
+      };
       const user = this.query.selectUser("id", request.session.user_id);
 
       if (!user) {
@@ -116,7 +127,9 @@ export class AuthApi extends Api {
     },
 
     forgotPassword: async (request, response) => {
-      const { email } = request.body;
+      const { email } = {
+        email: validator.validateEmail(request.body.email),
+      };
       const user = this.query.selectUser("email", email);
 
       if (!user) {
@@ -142,7 +155,10 @@ export class AuthApi extends Api {
     },
 
     resetPassword: async (request, response) => {
-      const { newPassword, token } = request.body;
+      const { newPassword, token } = {
+        newPassword: validator.validatePassword(request.body.newPassword),
+        token: validator.validateString(request.body.token),
+      };
       const reset = await this.session.validateToken(token);
 
       if (!reset) {
