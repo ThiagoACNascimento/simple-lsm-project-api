@@ -11,6 +11,10 @@ export class LmsApi extends Api {
 
   handlers = {
     postCourse: (request, response) => {
+      if (!request.session) {
+        throw new RouteError(401, "Nao autorizado");
+      }
+
       const { slug, title, description, lessons, hours } = {
         slug: validator.validateString(request.body.slug),
         title: validator.validateString(request.body.title),
@@ -73,6 +77,10 @@ export class LmsApi extends Api {
     },
 
     postLesson: (request, response) => {
+      if (!request.session) {
+        throw new RouteError(401, "Nao autorizado");
+      }
+
       const {
         courseSlug,
         slug,
@@ -114,14 +122,17 @@ export class LmsApi extends Api {
     },
 
     postCompletedLesson: (request, response) => {
-      const userId = 1;
+      if (!request.session) {
+        throw new RouteError(401, "Nao autorizado");
+      }
+
       const { courseId, lessonId } = {
         courseId: validator.validateNumber(request.body.courseId),
         lessonId: validator.validateNumber(request.body.lessonId),
       };
 
       const writeResult = this.query.insertLessonCompleted(
-        userId,
+        request.session.user_id,
         courseId,
         lessonId,
       );
@@ -130,10 +141,16 @@ export class LmsApi extends Api {
         throw new RouteError(400, "Erro ao completar aula.");
       }
 
-      const progress = this.query.selectProgress(userId, courseId);
+      const progress = this.query.selectProgress(
+        request.session.user_id,
+        courseId,
+      );
       const incompliteLessons = progress.filter((item) => !item.completed);
       if (progress.length > 0 && incompliteLessons.length === 0) {
-        const result = this.query.insertCertificate(userId, courseId);
+        const result = this.query.insertCertificate(
+          request.session.user_id,
+          courseId,
+        );
 
         if (!result) {
           throw new RouteError(400, "Erro ao gerar certificado");
@@ -168,11 +185,10 @@ export class LmsApi extends Api {
         indexLessonNav === 0 ? null : nav.at(indexLessonNav - 1)?.slug;
       const indexNext = nav.at(indexLessonNav + 1)?.slug ?? null;
 
-      const userId = 1;
       let completed = "";
-      if (userId) {
+      if (request.session) {
         const lessonCompleted = this.query.selectLessonCompleted(
-          userId,
+          request.session.user_id,
           lesson.id,
         );
         if (lessonCompleted) {
@@ -184,11 +200,16 @@ export class LmsApi extends Api {
     },
 
     resetCourse: (request, response) => {
-      const userId = 1;
+      if (!request.session) {
+        throw new RouteError(401, "Nao autorizado");
+      }
       const { courseId } = {
         courseId: validator.validateNumber(request.body.courseId),
       };
-      const writeResult = this.query.deleteLessonsCopleted(userId, courseId);
+      const writeResult = this.query.deleteLessonsCopleted(
+        request.session.user_id,
+        courseId,
+      );
 
       if (writeResult.changes === 0) {
         throw new RouteError(400, "Erro no reset do curso");
@@ -200,8 +221,13 @@ export class LmsApi extends Api {
     },
 
     getCertificates: (request, response) => {
-      const userId = 1;
-      const certificates = this.query.selectCertificates(userId);
+      if (!request.session) {
+        throw new RouteError(401, "Nao autorizado");
+      }
+
+      const certificates = this.query.selectCertificates(
+        request.session.user_id,
+      );
 
       if (certificates.length === 0) {
         throw new RouteError(400, "Nenhum certificado encontrado!");
@@ -227,19 +253,32 @@ export class LmsApi extends Api {
   }
 
   routes(): void {
-    this.router.post("/lms/course", this.handlers.postCourse);
+    this.router.post("/lms/course", this.handlers.postCourse, [
+      this.auth.guard("admin"),
+    ]);
     this.router.get("/lms/courses", this.handlers.getCourses);
     this.router.get("/lms/course/:slug", this.handlers.getCourse, [
       this.auth.optional,
     ]);
-    this.router.delete("/lms/course/reset", this.handlers.resetCourse);
-    this.router.post("/lms/lesson", this.handlers.postLesson);
+    this.router.delete("/lms/course/reset", this.handlers.resetCourse, [
+      this.auth.guard("user"),
+    ]);
+    this.router.post("/lms/lesson", this.handlers.postLesson, [
+      this.auth.guard("admin"),
+    ]);
     this.router.get(
       "/lms/lesson/:courseSlug/:lessonSlug",
       this.handlers.getLesson,
+      [this.auth.optional],
     );
-    this.router.post("/lms/lesson/complete", this.handlers.postCompletedLesson);
-    this.router.get("/lms/certificates", this.handlers.getCertificates);
+    this.router.post(
+      "/lms/lesson/complete",
+      this.handlers.postCompletedLesson,
+      [this.auth.guard("user")],
+    );
+    this.router.get("/lms/certificates", this.handlers.getCertificates, [
+      this.auth.guard("user"),
+    ]);
     this.router.get("/lms/certificates/:id", this.handlers.getCertificate);
   }
 }

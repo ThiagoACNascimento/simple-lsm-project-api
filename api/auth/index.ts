@@ -6,6 +6,7 @@ import { AuthQuery } from "./query.ts";
 import { COOKIE_SESSION_ID_KEY, SessionService } from "./services/session.ts";
 import { authTables } from "./tables.ts";
 import { Password } from "./utils/password.ts";
+import { rateLimit } from "../../core/middleware/rate-limit.ts";
 
 export class AuthApi extends Api {
   query = new AuthQuery(this.db);
@@ -204,13 +205,21 @@ export class AuthApi extends Api {
   }
 
   routes(): void {
-    this.router.post("/auth/user", this.handlers.postUser);
-    this.router.post("/auth/login", this.handlers.postLogin);
+    this.router.post("/auth/user", this.handlers.postUser, [
+      rateLimit(30_000, 15),
+    ]);
+    this.router.post("/auth/login", this.handlers.postLogin, [
+      rateLimit(30_000, 5),
+    ]);
     this.router.patch("/auth/password/update", this.handlers.patchPassword, [
       this.auth.guard("user"),
     ]);
-    this.router.post("/auth/password/forgot", this.handlers.forgotPassword);
-    this.router.post("/auth/password/reset", this.handlers.resetPassword);
+    this.router.post("/auth/password/forgot", this.handlers.forgotPassword, [
+      rateLimit(30_000, 5),
+    ]);
+    this.router.post("/auth/password/reset", this.handlers.resetPassword, [
+      rateLimit(30_000, 5),
+    ]);
     this.router.get("/auth/session", this.handlers.getSession, [
       this.auth.guard("user"),
     ]);
