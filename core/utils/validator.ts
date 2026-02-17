@@ -2,6 +2,7 @@ import { RouteError } from "./route-error.ts";
 
 const EMAIL_REGEX = /^[^@]+@[^@]+\.[^@]$/;
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/;
+const FILE_REGEX = /^(?!\.)[A-Za-z0-9._-]+$/;
 
 function validateString(value: unknown) {
   if (typeof value !== "string") {
@@ -82,6 +83,14 @@ function validatePassword(value: unknown) {
   return PASSWORD_REGEX.test(value) ? value : undefined;
 }
 
+function validateFiles(value: unknown) {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+
+  return FILE_REGEX.test(value) ? value : undefined;
+}
+
 type Parse<Value> = (value: unknown) => Value | undefined;
 
 function valueRequired<Value>(func: Parse<Value>, error: string) {
@@ -103,6 +112,7 @@ export const validator = {
   validateObject: valueRequired(validateObject, "Objeto esperado"),
   validateEmail: valueRequired(validateEmail, "Email invalido"),
   validatePassword: valueRequired(validatePassword, "Senha invalida"),
+  validateFiles: valueRequired(validateFiles, "Nove de arquivo invalido"),
   optional: {
     validateString,
     validateNumber,
@@ -110,5 +120,6 @@ export const validator = {
     validateObject,
     validateEmail,
     validatePassword,
+    validateFiles,
   },
 };
