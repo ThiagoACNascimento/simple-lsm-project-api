@@ -67,6 +67,11 @@
       }
     </style>
 
+    <form id="upload">
+      <input type="file" name="files" multiple />
+      <button>Upload</button>
+    </form>
+
     <form id="login">
       <label for="email">Email</label>
       <input type="email" name="email" id="email" />
@@ -114,6 +119,24 @@
       const resetPassword = document.getElementById("reset-password");
       const result = document.getElementById("result");
       const logout = document.getElementById("logout");
+      const upload = document.getElementById("upload");
+
+      upload.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const input = upload.querySelector('input[type="file"]');
+        const files = input.files;
+        if (!files || files.length === 0) return;
+        for (const file of files) {
+          const response = await fetch("/files", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/octet-stream",
+              "x-filename": file.name,
+            },
+            body: file,
+          });
+        }
+      });
 
       login.addEventListener("submit", async (event) => {
         event.preventDefault();
@@ -126,6 +149,11 @@
 
           body: JSON.stringify(Object.fromEntries(data)),
         });
+        const body = await response.json();
+        result.innerText = JSON.stringify(body, null, 2);
+        if (response.ok) {
+          window.location.reload();
+        }
       });
 
       updatePassword.addEventListener("submit", async (event) => {
