@@ -1,216 +1,393 @@
 <!doctype html>
-<html lang="en">
+<html lang="br">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tiny LMS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Cardo&display=swap"
+    />
   </head>
   <body>
+    <h1>Tiny LMS</h1>
+    <div class="container">
+      <nav data-role="public">
+        <ul>
+          <li><a href="#/login">Login</a></li>
+          <li><a href="#/criar-conta">Criar</a></li>
+        </ul>
+      </nav>
+
+      <nav data-role="user">
+        <ul>
+          <li><a href="#/cursos">Cursos</a></li>
+          <li><a href="#/certificados">Certificados</a></li>
+          <li><a href="#/sair">Sair</a></li>
+        </ul>
+      </nav>
+
+      <nav data-role="admin">
+        <ul>
+          <li><a href="#/criar-cursos">Cursos</a></li>
+          <li><a href="#/criar-aulas">Aulas</a></li>
+          <li><a href="#/usuarios">Users</a></li>
+          <li><a href="#/sair">Sair</a></li>
+        </ul>
+      </nav>
+
+      <section id="login" data-role="public">
+        <h2>Login Conta</h2>
+        <form>
+          <label for="email">Email</label>
+          <input type="email" name="email" id="email" />
+
+          <label for="password">Senha</label>
+          <input type="password" name="password" id="password" />
+
+          <div class="split">
+            <button>Login</button>
+            <a href="#/perdeu">Recuperar Senha</a>
+          </div>
+        </form>
+      </section>
+
+      <section id="perdeu" data-role="public">
+        <h2>Perdeu a Senha?</h2>
+        <form>
+          <label for="email-perdeu">Email</label>
+          <input type="email" name="email" id="email-perdeu" />
+
+          <button>Esqueci a senha</button>
+        </form>
+      </section>
+
+      <section id="resetar" data-role="public">
+        <h2>Resetar Senha</h2>
+        <form>
+          <label for="newPassword">Senha</label>
+          <input type="password" name="newPassword" id="email-perdeu" />
+          <input type="hidden" />
+          <button>Resetar Senha</button>
+        </form>
+      </section>
+
+      <section id="criar-conta" data-role="public">
+        <h2>Criar Conta</h2>
+        <form>
+          <label for="name">Nome</label>
+          <input type="text" name="name" id="name" />
+
+          <label for="username">Username</label>
+          <input type="text" name="username" id="username" />
+
+          <label for="email-criar">Email</label>
+          <input type="email" name="email" id="email-criar" />
+
+          <label for="password-criar">Senha</label>
+          <input type="password" name="password" id="password-criar" />
+
+          <button>Criar conta</button>
+        </form>
+      </section>
+
+      <section id="criar-curso" data-role="admin">
+        <div class="render"></div>
+        <form>
+          <label for="slug">Slug</label>
+          <input type="text" name="slug" id="slug" />
+
+          <label for="title">Titulo</label>
+          <input type="text" name="title" id="title" />
+
+          <label for="description">Descricao</label>
+          <input type="text" name="description" id="description" />
+
+          <label for="lessons">Aulas</label>
+          <input type="number" name="lessons" id="lessons" />
+
+          <label for="hours">Horas</label>
+          <input type="number" name="hours" id="hours" />
+
+          <button>Criar/Atualizar Curso</button>
+        </form>
+      </section>
+
+      <section id="criar-aula" data-role="admin">
+        <div class="render"></div>
+        <form>
+          <label for="course-slug">Curso</label>
+          <input type="text" name="courseSlug" id="course-slug" />
+
+          <label for="lesson-slug">Slug</label>
+          <input type="text" name="slug" id="lesson-slug" />
+
+          <label for="lesson-title">Titulo</label>
+          <input type="text" name="title" id="lesson-title" />
+
+          <label for="lesson-description">Descricao</label>
+          <input type="text" name="description" id="lesson-description" />
+
+          <label for="seconds">Segundos</label>
+          <input type="number" name="seconds" id="seconds" />
+
+          <label for="order">Ordem</label>
+          <input type="number" name="order" id="order" />
+
+          <label for="free">Gratuita</label>
+          <input type="number" name="free" id="free" value="0" />
+
+          <label for="file">Video</label>
+          <input type="file" name="file" id="file" />
+
+          <label for="video">Video Path</label>
+          <input type="text" name="video" id="video" />
+
+          <button>Criar/Atualizar Curso</button>
+        </form>
+      </section>
+
+      <section id="cursos" data-role="users">
+        <div class="render"></div>
+      </section>
+
+      <section id="curso" data-role="users">
+        <div class="render"></div>
+      </section>
+
+      <section id="aula" data-role="users">
+        <div class="render"></div>
+      </section>
+
+      <section id="certificados" data-role="users">
+        <div class="render"></div>
+      </section>
+
+      <section data-role="admin" id="usuarios">
+        <form>
+          <label for="search">Buscar</label>
+          <input type="text" name="search" id="search" />
+
+          <label for="page">Pagina:</label>
+          <input type="number" name="page" id="page" value="1" />
+
+          <button class="hidden">Buscar</button>
+        </form>
+      </section>
+    </div>
+
     <style>
       * {
         box-sizing: border-box;
-        font-family: monospace;
       }
-      body {
-        background: black;
-        color: white;
-        font-size: 1.125rem;
-      }
-      form,
-      pre {
-        margin: 0;
-        max-width: 600px;
-        padding: 1rem;
-        margin: 0 auto;
-        overflow: auto;
-      }
-      input,
-      button {
-        display: block;
-        width: 100%;
-        padding: 0.75rem;
-        margin: 0.5rem 0 1rem 0;
-        border-radius: 8px;
-        color: white;
-        border: 1px solid #222;
-      }
-      input {
-        background: linear-gradient(
+      html {
+        --font: "Cardo", serif;
+        --black: black;
+        --gray-1: #171717;
+        --gray-2: #222;
+        --gray-3: #333;
+        --gray-4: #777;
+        --gray-5: #aaa;
+        --gray-6: #ccc;
+        --gray-7: #ececec;
+        --white: white;
+        --gradient-1: linear-gradient(
           to bottom,
           rgba(255, 255, 255, 0.05),
           rgba(255, 255, 255, 0.025)
         );
-      }
-      input:focus {
-        outline: white;
-        border-color: white;
-      }
-      button {
-        background: linear-gradient(
+        --gradient-2: linear-gradient(
           to bottom,
-          rgba(255, 255, 255, 0.15),
+          rgba(255, 255, 255, 0.1),
           rgba(255, 255, 255, 0.05)
         );
-        cursor: pointer;
-      }
-      button:hover {
-        background: linear-gradient(
+        --gradient-3: linear-gradient(
           to bottom,
-          rgba(255, 255, 255, 0.2),
+          rgba(255, 255, 255, 0.15),
           rgba(255, 255, 255, 0.1)
         );
       }
-
-      #logout {
-        max-width: 200px;
-        margin: 0 auto;
+      body {
+        margin-bottom: 600px;
+        font-family: var(--font);
+        background: var(--black);
+        color: var(--white);
+        font-size: 1.125rem;
+      }
+      ul,
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0px;
+        padding: 0px;
+      }
+      h1 {
+        text-align: center;
+        margin: 2rem 0;
+        font-size: 3rem;
+      }
+      h2 {
+        margin-bottom: 1.5rem;
+      }
+      a {
+        color: var(--gray-4);
+      }
+      .container {
+        max-width: 33rem;
+        padding: 0.5rem;
+        margin: 0 auto 6rem auto;
+      }
+      section > form {
+        display: grid;
+        grid-template-columns: 6rem 1fr;
+        gap: 1rem 0.5rem;
+        align-items: center;
+        margin-left: -7rem;
+        margin-bottom: 2rem;
+      }
+      input,
+      label {
+        display: block;
+        width: 100%;
+        font-size: 1rem;
+        border: 1px solid var(--gray-2);
+        box-shadow: inset 0 0 0 2px var(--black);
+        padding: 0.75rem;
+        font-family: sans-serif;
+        border-radius: 100px;
+        color: var(--gray-5);
+        background: var(--gradient-1);
+      }
+      label {
+        font-size: 0.85rem;
+        background: var(--gradient-2);
+      }
+      input:focus {
+        outline: none;
+        border-color: var(--white);
+      }
+      form button,
+      form .split {
+        grid-column: 2;
+      }
+      .split {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+      }
+      @media (width < 47rem) {
+        section > form {
+          margin-left: 0;
+        }
+      }
+      @media (width < 28rem) {
+        section > form {
+          grid-template-columns: 5rem 1fr;
+          gap: 0.5rem;
+        }
+        label {
+          font-size: 0.75rem;
+        }
+        form .split {
+          flex-direction: column;
+          align-items: start;
+        }
+      }
+      button,
+      .btn,
+      select {
+        font-size: 1rem;
+        display: block;
+        width: max-content;
+        min-width: 160px;
+        padding: 0.75rem 1.5rem;
+        appearance: none;
+        font-family: sans-serif;
+        border-radius: 100px;
+        color: var(--white);
+        border: 1px solid var(--gray-2);
+        background: var(--gradient-2);
+        box-shadow: inser 0 0 0 2px var(--black);
+        text-decoration: none;
+        cursor: pointer;
+      }
+      button:hover,
+      .btn:hover,
+      select:hover {
+        border-color: var(--gray-3);
+        background: var(--gradient-3);
+      }
+      button:focus,
+      .btn:focus {
+        outline: none;
+        border-color: var(--white);
+      }
+      nav {
+        margin-bottom: 2rem;
+      }
+      nav ul {
+        display: flex;
+        justify-content: space-around;
+        list-style: none;
+        border: 1px solid var(--gray-2);
+        border-radius: 100px;
+        padding: 2px;
+      }
+      nav li {
+        display: block;
+        flex: 1;
+      }
+      nav a {
+        font-size: 1rem;
+        width: 100%;
+        padding: 0.5rem;
+        text-align: center;
+        font-family: var(--font);
+        text-decoration: none;
+        display: block;
+        color: var(--white);
+        background: var(--gradient-2);
+      }
+      nav li:first-child a {
+        border-top-left-radius: 100px;
+        border-bottom-left-radius: 100px;
+      }
+      nav li:last-child a {
+        border-top-right-radius: 100px;
+        border-bottom-right-radius: 100px;
+      }
+      nav a:hover,
+      nav a.active {
+        background: var(--gradient-3);
+      }
+      select {
+        width: 100%;
+        margin-bottom: 2px;
+      }
+      section,
+      .render {
+        animation: slideIn 0.3s ease-out forwards;
+      }
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(-8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      [data-role] {
+        display: none;
+      }
+      [data-role].ativo {
+        display: block;
       }
     </style>
-
-    <form id="upload">
-      <input type="file" name="files" multiple />
-      <button>Upload</button>
-    </form>
-
-    <form id="login">
-      <label for="email">Email</label>
-      <input type="email" name="email" id="email" />
-
-      <label for="password">Senha</label>
-      <input type="password" name="password" id="password" />
-
-      <button>Loggar</button>
-    </form>
-
-    <form id="update-password">
-      <label for="password">Senha Atual</label>
-      <input type="password" name="password" value="12345" />
-
-      <label for="newPassword">Senha Nova</label>
-      <input type="password" name="newPassword" value="123" />
-
-      <button>Atualizar</button>
-    </form>
-
-    <form id="forgot-password">
-      <label for="email">Email</label>
-      <input type="email" name="email" value="thiago@test.com" />
-
-      <button>Esqueci a Senha</button>
-    </form>
-
-    <form id="reset-password">
-      <label for="newPassword">Nova Senha</label>
-      <input type="password" name="newPassword" value="123456789" />
-
-      <label for="token">Token</label>
-      <input type="text" name="token" value="" />
-
-      <button>Resetar Senha</button>
-    </form>
-
-    <button id="logout">Sair</button>
-    <pre id="result"></pre>
-
-    <script>
-      const login = document.getElementById("login");
-      const updatePassword = document.getElementById("update-password");
-      const forgotPassword = document.getElementById("forgot-password");
-      const resetPassword = document.getElementById("reset-password");
-      const result = document.getElementById("result");
-      const logout = document.getElementById("logout");
-      const upload = document.getElementById("upload");
-
-      upload.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        const input = upload.querySelector('input[type="file"]');
-        const files = input.files;
-        if (!files || files.length === 0) return;
-        for (const file of files) {
-          const response = await fetch("/files", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/octet-stream",
-              "x-filename": file.name,
-            },
-            body: file,
-          });
-        }
-      });
-
-      login.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        const data = new FormData(login);
-        const response = await fetch("/auth/login", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-
-          body: JSON.stringify(Object.fromEntries(data)),
-        });
-        const body = await response.json();
-        result.innerText = JSON.stringify(body, null, 2);
-        if (response.ok) {
-          window.location.reload();
-        }
-      });
-
-      updatePassword.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        const data = new FormData(updatePassword);
-        const response = await fetch("/auth/password/update", {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-
-          body: JSON.stringify(Object.fromEntries(data)),
-        });
-      });
-
-      forgotPassword.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        const data = new FormData(forgotPassword);
-        const response = await fetch("/auth/password/forgot", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-
-          body: JSON.stringify(Object.fromEntries(data)),
-        });
-      });
-
-      resetPassword.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        const data = new FormData(resetPassword);
-        const response = await fetch("/auth/password/reset", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-
-          body: JSON.stringify(Object.fromEntries(data)),
-        });
-      });
-
-      logout.addEventListener("click", async (event) => {
-        event.preventDefault();
-        const response = await fetch("/auth/logout", {
-          method: "DELETE",
-        });
-
-        if (response.ok) window.location.reload();
-      });
-
-      async function autenticado() {
-        const response = await fetch("auth/session");
-        const body = await response.json();
-        result.innerHTML = JSON.stringify(body, null, 2);
-      }
-
-      autenticado();
-    </script>
   </body>
 </html>
