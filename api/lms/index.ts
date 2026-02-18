@@ -121,6 +121,14 @@ export class LmsApi extends Api {
       });
     },
 
+    getLessons: (request, response) => {
+      const lessons = this.query.selectAllLessons();
+      if (lessons.length === 0) {
+        throw new RouteError(404, "Aulas nao encontradas");
+      }
+      response.status(200).json(lessons);
+    },
+
     postCompletedLesson: (request, response) => {
       if (!request.session) {
         throw new RouteError(401, "Nao autorizado");
@@ -276,6 +284,9 @@ export class LmsApi extends Api {
       this.auth.guard("user"),
     ]);
     this.router.post("/lms/lesson", this.handlers.postLesson, [
+      this.auth.guard("admin"),
+    ]);
+    this.router.get("/lms/lessons", this.handlers.getLessons, [
       this.auth.guard("admin"),
     ]);
     this.router.get(

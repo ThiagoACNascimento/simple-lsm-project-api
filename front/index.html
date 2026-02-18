@@ -836,6 +836,37 @@
             render.append(select);
           });
         },
+
+        ["criar-aula"]: (route) => {
+          getData("/lms/lessons", (lessons) => {
+            const render = route.querySelector(".render");
+            const form = route.querySelector("form");
+            render.innerHTML = "";
+            const select = document.createElement("select");
+            select.name = "lessons-select";
+            let index = 0;
+            select.add(new Option("Selecione a aula", null));
+            for (const lesson of lessons) {
+              select.add(
+                new Option(`${lesson.courseSlug} - ${lesson.slug}`, index),
+              );
+              index++;
+            }
+
+            select.addEventListener("change", (e) => {
+              e.preventDefault();
+              const lesson = lessons[select.value];
+              for (const key in lesson) {
+                const input = form.querySelector(`[name=${key}]`);
+                if (input) {
+                  input.value = lesson[key];
+                }
+              }
+            });
+
+            render.append(select);
+          });
+        },
       };
 
       async function sendForm(method, url, id, callback) {

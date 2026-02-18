@@ -69,20 +69,28 @@ export class LmsQuery extends Query {
   }: LessonCreate) {
     return this.db
       .query(
-        /*sql*/ `
-        INSERT OR IGNORE INTO "lessons"
-          (
-            "course_id", "slug", 
-            "title", "seconds", 
-            "video", "description", 
-            "order", "free"
-          )
-        VALUES 
-          (
-            (SELECT "id" FROM "courses" WHERE "slug" = ?),
-            ?,?,?,?,?,?,?
-          )
-          ;`,
+        /*sql*/
+        `
+          INSERT INTO "lessons"
+            (
+              "course_id", "slug", 
+              "title", "seconds", 
+              "video", "description", 
+              "order", "free"
+            )
+          VALUES 
+            (
+              (SELECT "id" FROM "courses" WHERE "slug" = ?),
+              ?,?,?,?,?,?,?
+            )
+          ON CONFLICT ("course_id", "slug") DO UPDATE SET
+            "title" = excluded."title",
+            "description" = excluded."description",
+            "seconds" = excluded."seconds",
+            "order" = excluded."order",
+            "free" = excluded."free",
+            "video" = excluded."video"
+      ;`,
       )
       .run(courseSlug, slug, title, seconds, video, description, order, free);
   }
@@ -156,6 +164,28 @@ export class LmsQuery extends Query {
     ;`,
       )
       .get(courseSlug, lessonSlug) as LessonData | undefined;
+  }
+
+  selectAllLessons() {
+    return this.db
+      .prepare(
+        /*sql*/
+        `
+        SELECT 
+          "l".*, "c"."slug" as "courseSlug"
+        FROM
+          "lessons" as "l"
+        JOIN
+          "courses" as "c"
+        ON 
+          "c"."id" = "l"."course_id"
+        ORDER BY
+          "l"."course_id" ASC,
+          "l"."order" ASC
+        LIMIT 200
+      `,
+      )
+      .all() as LessonData[];
   }
 
   selectLessonNav(courseSlug: string, lessonSlug: string) {
