@@ -19,7 +19,7 @@ export class LmsApi extends Api {
         slug: validator.validateString(request.body.slug),
         title: validator.validateString(request.body.title),
         description: validator.validateString(request.body.description),
-        lessons: validator.validateNumber(request.body.lesson),
+        lessons: validator.validateNumber(request.body.lessons),
         hours: validator.validateNumber(request.body.hours),
       };
 
@@ -121,6 +121,14 @@ export class LmsApi extends Api {
       });
     },
 
+    getLessons: (request, response) => {
+      const lessons = this.query.selectAllLessons();
+      if (lessons.length === 0) {
+        throw new RouteError(404, "Aulas nao encontradas");
+      }
+      response.status(200).json(lessons);
+    },
+
     postCompletedLesson: (request, response) => {
       if (!request.session) {
         throw new RouteError(401, "Nao autorizado");
@@ -145,7 +153,9 @@ export class LmsApi extends Api {
         request.session.user_id,
         courseId,
       );
+
       const incompliteLessons = progress.filter((item) => !item.completed);
+
       if (progress.length > 0 && incompliteLessons.length === 0) {
         const result = this.query.insertCertificate(
           request.session.user_id,
@@ -160,6 +170,7 @@ export class LmsApi extends Api {
           title: "Aula completada.",
           certificate: result.id,
         });
+        return;
       }
 
       response.status(201).json({
@@ -206,13 +217,22 @@ export class LmsApi extends Api {
       const { courseId } = {
         courseId: validator.validateNumber(request.body.courseId),
       };
-      const writeResult = this.query.deleteLessonsCopleted(
+      const writeResultLessons = this.query.deleteLessonsCopleted(
         request.session.user_id,
         courseId,
       );
 
-      if (writeResult.changes === 0) {
+      if (writeResultLessons.changes === 0) {
         throw new RouteError(400, "Erro no reset do curso");
+      }
+
+      const writeResultCertificate = this.query.deleteCertificate(
+        request.session.user_id,
+        courseId,
+      );
+
+      if (writeResultCertificate.changes === 0) {
+        throw new RouteError(400, "Erro ao deletar certificado");
       }
 
       response.status(200).json({
@@ -237,8 +257,8 @@ export class LmsApi extends Api {
     },
 
     getCertificate: (request, response) => {
-      const { certificateId } = request.params;
-      const certificate = this.query.selectCertificate(certificateId);
+      const { id } = request.params;
+      const certificate = this.query.selectCertificate(id);
 
       if (!certificate) {
         throw new RouteError(400, "Certificado nao encontrado!");
@@ -266,6 +286,9 @@ export class LmsApi extends Api {
     this.router.post("/lms/lesson", this.handlers.postLesson, [
       this.auth.guard("admin"),
     ]);
+    this.router.get("/lms/lessons", this.handlers.getLessons, [
+      this.auth.guard("admin"),
+    ]);
     this.router.get(
       "/lms/lesson/:courseSlug/:lessonSlug",
       this.handlers.getLesson,
@@ -279,6 +302,6 @@ export class LmsApi extends Api {
     this.router.get("/lms/certificates", this.handlers.getCertificates, [
       this.auth.guard("user"),
     ]);
-    this.router.get("/lms/certificates/:id", this.handlers.getCertificate);
+    this.router.get("/lms/certificate/:id", this.handlers.getCertificate);
   }
 }
