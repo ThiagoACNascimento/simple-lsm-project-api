@@ -31,8 +31,8 @@
 
       <nav data-role="admin">
         <ul>
-          <li><a href="#/criar-cursos">Cursos</a></li>
-          <li><a href="#/criar-aulas">Aulas</a></li>
+          <li><a href="#/criar-curso">Cursos</a></li>
+          <li><a href="#/criar-aula">Aulas</a></li>
           <li><a href="#/usuarios">Users</a></li>
           <li><a href="#/sair">Sair</a></li>
         </ul>
@@ -69,7 +69,7 @@
         <form>
           <label for="newPassword">Senha</label>
           <input type="password" name="newPassword" id="email-perdeu" />
-          <input type="hidden" />
+          <input type="hidden" name="token" />
           <button>Resetar Senha</button>
         </form>
       </section>
@@ -142,26 +142,26 @@
           <label for="file">Video</label>
           <input type="file" name="file" id="file" />
 
-          <label for="video">Video Path</label>
-          <input type="text" name="video" id="video" />
+          <label for="video-path">Video Path</label>
+          <input type="text" name="video" id="video-path" />
 
           <button>Criar/Atualizar Curso</button>
         </form>
       </section>
 
-      <section id="cursos" data-role="users">
+      <section id="cursos" data-role="user">
         <div class="render"></div>
       </section>
 
-      <section id="curso" data-role="users">
+      <section id="curso" data-role="user">
         <div class="render"></div>
       </section>
 
-      <section id="aula" data-role="users">
+      <section id="aula" data-role="user">
         <div class="render"></div>
       </section>
 
-      <section id="certificados" data-role="users">
+      <section id="certificados" data-role="user">
         <div class="render"></div>
       </section>
 
@@ -366,7 +366,7 @@
       }
       select {
         width: 100%;
-        margin-bottom: 2px;
+        margin-bottom: 1rem;
       }
       section,
       .render {
@@ -388,6 +388,503 @@
       [data-role].ativo {
         display: block;
       }
+      .ok,
+      .fail {
+        padding: 0.5rem 1rem;
+        animation: slideIn 0.3s ease-out forwards;
+        border-radius: 100px;
+        width: max-content;
+        background: #211100;
+        color: #ffca16;
+        grid-column: 2;
+      }
+      .ok {
+        background: #0c281c;
+        color: #3dd78c;
+      }
+      #curso {
+        margin-top: 2rem;
+      }
+      .curso-item {
+        padding: 0 1rem 2rem 1rem;
+        border-bottom: 2px dashed var(--gray-1);
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        text-align: center;
+        text-wrap: balance;
+      }
+      .curso-item > *:not(.btn) {
+        padding: 0.5rem;
+      }
+      .curso-item span:first-of-type {
+        border-right: 1px solid var(--gray-1);
+        justify-self: end;
+      }
+      .curso-item span:last-of-type {
+        border-left: 1px solid var(--gray-1);
+        justify-self: start;
+      }
+      .curso-item p,
+      .curso-item h2,
+      .curso-item .btn {
+        grid-column: 1/-1;
+      }
+      .curso-item h2 {
+        margin: 1rem 0 0 0;
+      }
+      .curso-item .btn {
+        margin-top: 1rem;
+        justify-self: center;
+      }
+      .curso-item p,
+      .curso-item span {
+        color: var(--gray-5);
+      }
+      .curso-aulas {
+        list-style: none;
+        margin-top: 1rem;
+      }
+      .curso-aulas li a {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 1rem;
+        padding: 0.75rem;
+        text-decoration: none;
+        align-items: center;
+        color: var(--gray-6);
+      }
+      .curso-aulas li:nth-of-type(even) a {
+        background: #111;
+      }
+      .curso-aulas li a:hover {
+        background: var(--gray-2);
+      }
+      .curso-aulas li a span {
+        color: var(--gray-4);
+        font-size: 0.75rem;
+        font-family: monospace;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+      .curso-aulas .status {
+        display: block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        border: 1px solid var(--gray-3);
+      }
+      .curso-aulas .status.completa {
+        background: linear-gradient(rgb(15, 16, 15), rgb(23, 232, 128));
+      }
+      #resetar-curso button {
+        margin: 1rem auto;
+      }
+      #aula h2 {
+        font-size: 1.5rem;
+        margin-bottom: 0px;
+      }
+      #breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        clear: var(--gray-4);
+      }
+      #breadcrumb a {
+        color: var(--gray-4);
+        text-decoration: none;
+        font-family: sans-serif;
+        font-size: 0.75rem;
+      }
+      #video {
+        aspect-ratio: 16/9;
+        margin: 1rem auto;
+        border-radius: 12px;
+        border: 1px solid --gray-1;
+        overflow: hidden;
+      }
+      video {
+        aspect-ratio: 16/9;
+        max-width: 100%;
+      }
+      #aula-nav {
+        display: grid;
+        grid-template-columns: 100px 1fr 100px;
+        justify-content: space-between;
+        justify-items: center;
+      }
+      #aula-nav a,
+      #aula-nav button {
+        padding: 0.5rem;
+        min-width: 70px;
+        font-size: 0.75rem;
+        line-height: 1;
+      }
+      #certificados ul {
+        list-style: none;
+        display: grid;
+        gap: 1.5rem;
+      }
+      #certificados ul li a {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        padding: 1rem;
+        align-items: center;
+        font-family: var(--font);
+      }
     </style>
+
+    <script>
+      const escape = (value) =>
+        String(value)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#39;");
+
+      const secToMin = (seconds) => {
+        const mm = String(Math.floor(seconds / 60)).padStart(2, "0");
+        const ss = String(Math.floor(seconds % 60)).padStart(2, "0");
+        return `${mm}:${ss}`;
+      };
+
+      const routes = document.querySelectorAll("section[data-role]");
+
+      const navs = document.querySelectorAll("nav[data-role]");
+      function handleUserNav(user) {
+        for (const nav of navs) {
+          if (nav.dataset.role === user) {
+            nav.classList.add("ativo");
+          } else {
+            nav.classList.remove("ativo");
+          }
+        }
+      }
+
+      let user;
+      async function getUser() {
+        user = "public";
+        try {
+          const response = await fetch("/auth/session");
+          if (!response.ok) {
+            throw new Error();
+          }
+          const response_body = await response.json();
+          console.log(response_body);
+          user = response_body.role;
+          return user;
+        } catch (error) {
+          return user;
+        } finally {
+          handleUserNav(user);
+        }
+      }
+
+      async function router() {
+        if (!user) {
+          user = await getUser();
+        }
+
+        console.log(user);
+
+        const r = location.hash
+          .replace("#", "")
+          .split("/")
+          .filter(Boolean)
+          .shift();
+        const route = document.getElementById(r);
+        routes.forEach((item) => item.classList.remove("ativo"));
+        if (route) {
+          if (user !== route.dataset.role) location.hash = "/login";
+          route.classList.add("ativo");
+          if (typeof data[r] === "function") data[r](route);
+        } else {
+          if (typeof data[r] === "function") data[r]();
+        }
+      }
+      window.addEventListener("DOMContentLoaded", router);
+      window.addEventListener("hashchange", router);
+
+      async function getData(url, callback) {
+        const response = await fetch(url);
+        const body = await response.json();
+        callback(body, response);
+      }
+
+      function renderResetCourseButton(courseId) {
+        setTimeout(() => {
+          sendForm("DELETE", "/lms/course/reset", "resetar-curso", () => {
+            location.reload();
+          });
+        }, 50);
+
+        return /*html*/ `
+          <div id="resetar-curso">
+            <form>
+              <input name="courseId" type="hidden" value="${escape(courseId)}">
+              <button>Resetar</button>
+            </form>
+          </div>
+        `;
+      }
+
+      function renderCompleteButton(courseId, lessonId) {
+        setTimeout(() => {
+          sendForm("POST", "/lms/lesson/complete", "completar", () => {
+            document.getElementById("completar").innerHTML = "<span></span>";
+          });
+        }, 50);
+
+        return /*html*/ `
+          <div id="completar">
+            <form>
+              <input name="courseId" type="hidden" value="${escape(courseId)}">
+              <input name="lessonId" type="hidden" value="${escape(lessonId)}">
+              <button>Completar</button>
+            </form>
+          </div>
+        `;
+      }
+
+      const data = {
+        cursos: (route) => {
+          getData("/lms/courses", (courses) => {
+            const render = route.querySelector(".render");
+            render.innerHTML = "";
+            let html = "";
+            for (const course of courses) {
+              html += /*html*/ `
+                <div class="curso-item">
+                  <h2>${escape(course.title)}</h2>
+                  <p>${escape(course.description)}</p>
+                  <span>Aulas: ${escape(course.lessons)}</span>
+                  <span>Horas: ${escape(course.hours)}</span>
+                  <a class="btn" href="#/curso/${escape(course.slug)}">${escape(course.title)}</a>
+                </div>
+              `;
+            }
+            render.innerHTML = html;
+          });
+        },
+
+        curso: (route) => {
+          const [_, curso] = location.hash
+            .replace("#", "")
+            .split("/")
+            .filter(Boolean);
+          if (!curso) return;
+          getData(`/lms/course/${curso}`, (data) => {
+            const { course, lessons, completed } = data;
+            const render = route.querySelector(".render");
+            render.innerHTML = "";
+            let html = /*html*/ `
+                <div class="curso-item">
+                  <h2>${escape(course.title)}</h2>
+                  <p>${escape(course.description)}</p>
+                  <span>Aulas: ${escape(course.lessons)}</span>
+                  <span>Horas: ${escape(course.hours)}</span>
+                </div>
+              `;
+            html += '<ul class="curso-aulas">';
+            for (const lesson of lessons) {
+              const isCompleted = completed.some(
+                (value) => value.lesson_id == lesson.id,
+              );
+
+              html += /*html*/ `
+                <li>
+                  <a href="#/aula/${escape(course.slug)}/${escape(lesson.slug)}">
+                    ${escape(lesson.title)}
+                    <span>
+                      <span>
+                        ${escape(secToMin(lesson.seconds))}
+                      </span>
+                      <span class="status ${isCompleted ? "completa" : ""}">
+                      </span>
+                    </span>
+                  </a>
+                </li>
+              `;
+            }
+            html += `</ul>
+              ${completed.length > 0 ? renderResetCourseButton(course.id) : ""}
+            `;
+
+            render.innerHTML = html;
+          });
+        },
+
+        aula: (route) => {
+          const [_, curso, aula] = location.hash
+            .replaceAll("#", "")
+            .split("/")
+            .filter(Boolean);
+
+          if (!curso || !aula) return;
+          getData(`/lms/lesson/${curso}/${aula}`, (lesson) => {
+            const render = route.querySelector(".render");
+            render.innerHTML = "";
+            let html = /*html*/ `
+              <div>
+                <h2>${escape(lesson.title)}</h2>
+                <div id="breadcrumb">
+                  <a href="#/cursos">cursos</a> >
+                  <a href="#/curso/${curso}">${curso}</a>
+                </div>
+                <div id="video">
+                  <video poster="" preload="metadata" src="/${lesson.video}" controls></video>
+                </div>
+                <nav id="aula-nav">
+                  ${
+                    lesson.indexPrev
+                      ? `<a class="btn" href="${escape(`#/aula/${curso}/${lesson.indexPrev}`)}">Anterior</a>`
+                      : `<span></span>`
+                  }
+
+                  ${
+                    lesson.completed
+                      ? `<span></span>`
+                      : renderCompleteButton(lesson.course_id, lesson.id)
+                  }
+
+                  ${
+                    lesson.indexNext
+                      ? `<a class="btn" href="${escape(`#/aula/${curso}/${lesson.indexNext}`)}">Proxima</a>`
+                      : `<span></span>`
+                  }
+                </nav>
+              </div>
+            `;
+            render.innerHTML = html;
+          });
+        },
+
+        certificados: (route) => {
+          getData("/lms/certificates", (certificates) => {
+            if (!Array.isArray(certificates)) {
+              return;
+            }
+            const render = route.querySelector(".render");
+            render.innerHTML = "";
+            let html = `<ul>`;
+            for (const certificate of certificates) {
+              html += /*html*/ `
+                <li>
+                  <a class="btn" target="_blank" href="/lms/certificate/${escape(certificate.id)}">${escape(certificate.title)}
+                    <span>${escape(certificate.completed).slice(0, 10).split("-").reverse().join("/")}
+                    </span>
+                  </a>
+                </li>
+              `;
+            }
+            html += "</ul>";
+            render.innerHTML = html;
+          });
+        },
+
+        sair: async () => {
+          await fetch("auth/logout", {
+            method: "DELETE",
+          });
+          user = "public";
+          location.hash = "/login";
+          handleUserNav(user);
+        },
+
+        resetar: () => {
+          const query = location.hash.split("=");
+          if (query[1]) {
+            const token = document.querySelector('input[name="token"]');
+            if (token) {
+              token.value = query[1];
+            }
+          }
+        },
+
+        ["criar-curso"]: async (route) => {
+          getData("/lms/courses", (courses) => {
+            const render = route.querySelector(".render");
+            const form = route.querySelector("form");
+
+            render.innerHTML = "";
+
+            const select = document.createElement("select");
+
+            select.name = "courses-select";
+            select.add(new Option("Selecionar Curso", null));
+
+            let index = 0;
+
+            for (const course of courses) {
+              select.add(new Option(course.slug, index));
+              index++;
+            }
+
+            select.addEventListener("change", (e) => {
+              e.preventDefault();
+              const course = courses[select.value];
+              for (const key in course) {
+                const input = form.querySelector(`[name=${key}]`);
+                if (input) {
+                  input.value = course[key];
+                }
+              }
+            });
+
+            render.append(select);
+          });
+        },
+      };
+
+      async function sendForm(method, url, id, callback) {
+        const form = document.querySelector("#" + id + " form");
+        form?.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const data = new FormData(form);
+          let response;
+          let body = {};
+          const badge = document.createElement("div");
+          try {
+            response = await fetch(url, {
+              method: method,
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(Object.fromEntries(data)),
+            });
+            body = await response.json();
+            if (!response.ok) throw new Error();
+            if (typeof callback === "function") callback(response, body);
+            badge.innerText = `${response.status}`;
+            badge.classList.add("ok");
+          } catch (error) {
+            badge.innerText = `${response.status} - ${body?.title}`;
+            badge.classList.add("fail");
+            console.log(response);
+          } finally {
+            form.append(badge);
+            setTimeout(() => {
+              badge?.remove();
+            }, 1500);
+          }
+        });
+      }
+
+      sendForm("POST", "/auth/login", "login", async () => {
+        user = await getUser();
+        if (user === "user") location.hash = "/cursos";
+        if (user === "admin") location.hash = "/criar-curso";
+      });
+
+      sendForm("POST", "/auth/user", "criar-conta", () => {
+        location.hash = "/login";
+      });
+
+      sendForm("POST", "/auth/password/forgot", "perdeu");
+
+      sendForm("POST", "/lms/course", "criar-curso");
+    </script>
   </body>
 </html>

@@ -143,7 +143,7 @@ export class AuthApi extends Api {
         ua: request.headers["user-agent"] || "",
       });
 
-      const resetLink = `${request.baseurl}/password/reset/?token=${token}`;
+      const resetLink = `${request.baseurl}/#/resetar/?token=${token}`;
 
       const mailContent = {
         to: user.email,
@@ -185,7 +185,9 @@ export class AuthApi extends Api {
         throw new RouteError(401, "Nao autorizado");
       }
 
-      response.status(200).json({ title: "valida" });
+      response
+        .status(200)
+        .json({ title: "valida", role: request.session.role });
     },
 
     deleteSession: (request, response) => {

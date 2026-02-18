@@ -1,6 +1,6 @@
 import { RouteError } from "./route-error.ts";
 
-const EMAIL_REGEX = /^[^@]+@[^@]+\.[^@]$/;
+const EMAIL_REGEX = /^[^@]+@[^@]+\.[^@]+$/;
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/;
 const FILE_REGEX = /^(?!\.)[A-Za-z0-9._-]+$/;
 

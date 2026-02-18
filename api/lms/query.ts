@@ -43,10 +43,15 @@ export class LmsQuery extends Query {
     return this.db
       .query(
         /*sql*/ `
-        INSERT OR IGNORE INTO "courses"
+        INSERT INTO "courses"
           ("slug", "title", "description", "lessons", "hours")
         VALUES 
           (?,?,?,?,?)
+        ON CONFLICT ("slug") DO UPDATE SET
+          "title" = excluded."title",
+          "description" = excluded."description",
+          "lessons" = excluded."lessons",
+          "hours" = excluded."hours"
       ;`,
       )
       .run(slug, title, description, lessons, hours);
@@ -237,6 +242,22 @@ export class LmsQuery extends Query {
       .run(userId, courseId);
   }
 
+  deleteCertificate(userId: number, courseId: number) {
+    return this.db
+      .prepare(
+        /*sql*/
+        `
+          DELETE FROM 
+            "certificates"
+          WHERE
+            "user_id" = ?
+            AND 
+            "course_id" = ?
+      ;`,
+      )
+      .run(userId, courseId);
+  }
+
   selectProgress(userId: number, courseId: number) {
     return this.db
       .prepare(
@@ -250,6 +271,7 @@ export class LmsQuery extends Query {
             "lessons_completed" as "lc"
           ON 
             "l"."id" = "lc"."lesson_id"
+            AND
             "lc"."user_id" = ?
           WHERE 
             "l"."course_id" = ?
