@@ -39,7 +39,7 @@ export class FilesApi extends Api {
       try {
         await pipeline(request, limitBytes(MAX_BYTES), write_stream);
         await rename(temp_path, write_path);
-        response.status(201).end("Ok");
+        response.status(201).json({ path: write_path, name: finalName });
       } catch (error) {
         if (error instanceof RouteError) {
           throw new RouteError(error.status, error.message);
