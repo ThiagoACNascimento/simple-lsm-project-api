@@ -916,6 +916,44 @@
       sendForm("POST", "/auth/password/forgot", "perdeu");
 
       sendForm("POST", "/lms/course", "criar-curso");
+
+      const lessonsForm = document.querySelector("#criar-aula form");
+      lessonsForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        try {
+          const input = lessonsForm.querySelector('input[type="file"]');
+
+          if (!input) return;
+
+          const files = input.files;
+
+          if (!files || files.length === 0) return;
+
+          const responseFile = await fetch("/files", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/octet-stream",
+              "x-filename": files[0].name,
+            },
+            body: files[0],
+          });
+
+          const upload = await responseFile.json();
+          const data = new FormData(lessonsForm);
+          data.set("video", upload.path);
+          const responseLesson = await fetch("/lms/lesson", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(Object.fromEntries(data)),
+          });
+
+          if (responseLesson.ok) location.reload();
+        } catch (error) {
+          console.log(error);
+        }
+      });
     </script>
   </body>
 </html>
