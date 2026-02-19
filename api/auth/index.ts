@@ -79,6 +79,26 @@ export class AuthApi extends Api {
       response.status(200).json({ title: "autenticado" });
     },
 
+    getUsers: (request, response) => {
+      const { search, page } = {
+        search: validator.optional.validateString(request.query.get("search")),
+        page: validator.optional.validateNumber(request.query.get("page")),
+      };
+
+      const result = this.query.selectUsers(search, 5, page);
+
+      if (result.length === 0) {
+        response.setHeader("X-Total-Count", "0");
+        response.status(200).json([]);
+        return;
+      }
+
+      const total = result[0].total;
+
+      response.setHeader("X-Total-Count", String(total));
+      response.status(200).json(result);
+    },
+
     patchPassword: async (request, response) => {
       if (!request.session) {
         throw new RouteError(401, "Nao autorizado");
@@ -213,6 +233,12 @@ export class AuthApi extends Api {
     this.router.post("/auth/login", this.handlers.postLogin, [
       rateLimit(30_000, 5),
     ]);
+    this.router.get("/auth/session", this.handlers.getSession, [
+      this.auth.guard("user"),
+    ]);
+    this.router.get("/auth/users/search", this.handlers.getUsers, [
+      this.auth.guard("admin"),
+    ]);
     this.router.patch("/auth/password/update", this.handlers.patchPassword, [
       this.auth.guard("user"),
     ]);
@@ -221,9 +247,6 @@ export class AuthApi extends Api {
     ]);
     this.router.post("/auth/password/reset", this.handlers.resetPassword, [
       rateLimit(30_000, 5),
-    ]);
-    this.router.get("/auth/session", this.handlers.getSession, [
-      this.auth.guard("user"),
     ]);
     this.router.delete("/auth/logout", this.handlers.deleteSession);
   }
