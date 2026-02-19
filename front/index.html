@@ -175,6 +175,7 @@
 
           <button class="hidden">Buscar</button>
         </form>
+        <div class="render"></div>
       </section>
     </div>
 
@@ -533,6 +534,32 @@
         align-items: center;
         font-family: var(--font);
       }
+      #usuarios ul {
+        margin-top: 1rem;
+        list-style: none;
+      }
+      #usuarios li {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 1rem;
+        font-size: 0.75rem;
+        border-bottom: 2px dashed var(--gray-1);
+        padding: 0.5rem 0;
+        color: var(--gray-5);
+      }
+      .hidden {
+        display: none;
+      }
+      #pages {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin: 1rem;
+      }
+      #pages button {
+        min-width: max-content;
+        padding: 0.25rem 0.75rem;
+      }
     </style>
 
     <script>
@@ -572,7 +599,6 @@
             throw new Error();
           }
           const response_body = await response.json();
-          console.log(response_body);
           user = response_body.role;
           return user;
         } catch (error) {
@@ -586,8 +612,6 @@
         if (!user) {
           user = await getUser();
         }
-
-        console.log(user);
 
         const r = location.hash
           .replace("#", "")
@@ -867,7 +891,63 @@
             render.append(select);
           });
         },
+
+        usuarios: (route) => {
+          const render = route.querySelector(".render");
+          getData("/auth/users/search", (users, response) => {
+            const total = Number(response.headers.get("x-total-count"));
+            renderUsers(users, total, render);
+          });
+
+          const form = document.querySelector("#usuarios form");
+          form.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const data = new FormData(form);
+            getData(
+              `/auth/users/search?search=${data.get("search")}&page=${data.get("page")}`,
+              (users, response) => {
+                const total = Number(response.headers.get("x-total-count"));
+                renderUsers(users, total, render);
+              },
+            );
+          });
+        },
       };
+
+      function renderUsers(users, total, render) {
+        let html = "<ul>";
+        const pages = document.createElement("nav");
+        const total_pages = Math.ceil(total / 5);
+        const form = document.querySelector("#usuarios form");
+        const page = document.getElementById("page");
+
+        render.innerHTML = "";
+        pages.id = "pages";
+
+        if (total_pages > 1) {
+          for (let i = 1; i <= total_pages; i++) {
+            const button = document.createElement("button");
+            button.innerText = 1;
+            button.addEventListener("click", (e) => {
+              page.value = i;
+              form.requestSubmit();
+            });
+            pages.append(button);
+          }
+        }
+
+        for (const user of users) {
+          html += /*html*/ `
+            <li>
+              <span>${escape(user.name)}</span>
+              <span>${escape(user.email)}</span>
+            </li>
+          `;
+        }
+        html += "</ul>";
+        render.innerHTML = html;
+        render.append(pages);
+      }
 
       async function sendForm(method, url, id, callback) {
         const form = document.querySelector("#" + id + " form");
@@ -893,7 +973,6 @@
           } catch (error) {
             badge.innerText = `${response.status} - ${body?.title}`;
             badge.classList.add("fail");
-            console.log(response);
           } finally {
             form.append(badge);
             setTimeout(() => {
