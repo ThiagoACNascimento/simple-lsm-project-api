@@ -282,4 +282,19 @@ export class AuthQuery extends Query {
       )
       .run(user_id);
   }
+
+  clearSessions() {
+    return this.db
+      .query(
+        /*sql*/
+        `
+          DELETE
+          FROM 
+            "sessions" 
+          WHERE
+            "expires" < UNIXEPOCH("now")
+      ;`,
+      )
+      .run();
+  }
 }

@@ -14,10 +14,20 @@ new AuthApi(core).init();
 new LmsApi(core).init();
 new FilesApi(core).init();
 
-core.router.get("/", async (request, response) => {
-  const index_html = await readFile("./front/index.html", "utf-8");
-  response.setHeader("Content-Type", "text/html; charset=utf-8");
-  response.status(200).end(index_html);
-});
-
 core.init();
+
+function shutdown(signal: string) {
+  console.log(signal);
+  core.server.close(() => {
+    console.log("HTTP server closed.");
+    core.db.close();
+    process.exit(0);
+  });
+  core.server.closeAllConnections();
+  setTimeout(() => {
+    process.exit(0);
+  }, 5_000).unref();
+}
+
+process.once("SIGINT", shutdown);
+process.once("SIGTERM", shutdown);
