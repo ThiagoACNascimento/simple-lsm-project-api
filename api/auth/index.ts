@@ -224,6 +224,13 @@ export class AuthApi extends Api {
 
   tables(): void {
     this.db.exec(authTables);
+    this.query.clearSessions();
+    setInterval(
+      () => {
+        this.query.clearSessions();
+      },
+      1000 * 60 * 60 * 6,
+    ).unref();
   }
 
   routes(): void {
