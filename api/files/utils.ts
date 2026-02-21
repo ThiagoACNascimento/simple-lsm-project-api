@@ -1,5 +1,9 @@
 import { Transform } from "node:stream";
 import { RouteError } from "../../core/utils/route-error.ts";
+import { spawn } from "node:child_process";
+import { once } from "node:events";
+import path from "node:path";
+import { rename } from "node:fs/promises";
 
 export const mimeType: Record<string, string> = {
   ".ico": "image/x-icon",
@@ -37,4 +41,19 @@ export function limitBytes(max: number) {
       next(null, chunk);
     },
   });
+}
+
+export async function cropImage(input: string, width: number, height: number) {
+  try {
+    const ext = path.extname(input);
+    const output = input.replace(ext, `.temp${ext}`);
+    const command = "vipsthumbnail";
+    const args = [input, "-s", `${width}x${height}`, "--crop", "-o", output];
+
+    const child = spawn(command, args);
+    await once(child, "close");
+    await rename(output, input);
+  } catch {
+    throw new RouteError(400, "Erro ao cortar imagem");
+  }
 }

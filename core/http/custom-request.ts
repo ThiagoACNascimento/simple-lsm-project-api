@@ -1,6 +1,7 @@
 import type { IncomingMessage } from "node:http";
 import { parseCookies } from "../utils/parse-cookies.ts";
 import type { UserRole } from "../../api/auth/query.ts";
+import { SERVER_NAME } from "../../env.ts";
 
 export interface CustomRequest extends IncomingMessage {
   query: URLSearchParams;
@@ -13,17 +14,25 @@ export interface CustomRequest extends IncomingMessage {
   baseurl: string;
 }
 
+function getIp(ip: string | string[] | undefined) {
+  if (ip === undefined) return "";
+  if (typeof ip === "string") return ip.split(",")[0].trim();
+  if (Array.isArray(ip) && typeof ip[0] === "string") return ip[0];
+  return "";
+}
+
 export async function customRequest(req: IncomingMessage) {
   const request = req as CustomRequest;
-  const url = new URL(request.url || "", "http://localhost");
+  request.baseurl = `https://${SERVER_NAME}`;
+  const url = new URL(request.url || "", request.baseurl);
+
   request.query = url.searchParams;
   request.pathname = url.pathname;
   request.params = {};
   request.body = {};
   request.cookies = parseCookies(request.headers.cookie);
-  request.ip = request.socket.remoteAddress || "127.0.0.1";
+  request.ip = getIp(request.headers["x-forwarded-for"]);
   request.session = null;
-  request.baseurl = "http://localhost:3000";
 
   return request;
 }
