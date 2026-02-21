@@ -4,8 +4,8 @@ services:
       context: .
       target: prod
     volumes:
-      - ./db:/db
-      - ./files:/files
+      - db:/db
+      - files:/files
     env_file:
       - .env
     logging:
@@ -24,7 +24,7 @@ services:
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - ./front:/front:ro
-      - ./files:/files:ro
+      - files:/files:ro
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
@@ -41,3 +41,5 @@ services:
 volumes:
   caddy_data:
   caddy_config:
+  files:
+  db:
