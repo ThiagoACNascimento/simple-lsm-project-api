@@ -4,6 +4,7 @@ import { validator } from "../../core/utils/validator.ts";
 import { LmsQuery } from "./query.ts";
 import { lmsTables } from "./tables.ts";
 import { AuthMiddleware } from "../auth/middleware/auth.ts";
+import { generateCertificate } from "./utils/certificate.ts";
 
 export class LmsApi extends Api {
   query = new LmsQuery(this.db);
@@ -264,7 +265,9 @@ export class LmsApi extends Api {
         throw new RouteError(400, "Certificado nao encontrado!");
       }
 
-      response.status(200).json(certificate);
+      const pdf = generateCertificate(certificate);
+      response.setHeader("Content-Type", "application/pdf");
+      response.status(200).end(pdf);
     },
   } satisfies Api["handlers"];
 

@@ -25,7 +25,7 @@ type LessonData = {
   created: string;
 };
 
-type CertificateFullData = {
+export type CertificateFullData = {
   id: string;
   name: string;
   title: string;
