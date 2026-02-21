@@ -21,7 +21,7 @@ function getIp(ip: string | string[] | undefined) {
   return "";
 }
 
-export async function customRequest(req: IncomingMessage) {
+export function customRequest(req: IncomingMessage) {
   const request = req as CustomRequest;
   request.baseurl = `https://${SERVER_NAME}`;
   const url = new URL(request.url || "", request.baseurl);

@@ -109,7 +109,9 @@ export class FilesApi extends Api {
   } satisfies Api["handlers"];
 
   routes(): void {
-    this.router.post("/files/upload", this.handlers.uploadFile);
+    this.router.post("/files/upload", this.handlers.uploadFile, [
+      this.auth.guard("admin"),
+    ]);
     this.router.get("/files/public/:name", this.handlers.getPublicFile);
     this.router.get("/files/private/:name", this.handlers.getPrivateFile, [
       this.auth.guard("user"),

@@ -25,8 +25,12 @@ export class Core {
 
   handler = async (request: IncomingMessage, response: ServerResponse) => {
     try {
-      const req = await customRequest(request);
+      const req = customRequest(request);
       const res = customResponse(response);
+
+      if (request.method === "HEAD") {
+        request.method = "GET";
+      }
 
       for (const middleware of this.router.middlweares) {
         await middleware(req, res);
